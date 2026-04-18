@@ -527,6 +527,8 @@ export default function RunPage() {
   const [templateSelected, setTemplateSelected] = useState("");
   const modelTriggerRef    = useRef<HTMLButtonElement>(null);
   const templateTriggerRef = useRef<HTMLButtonElement>(null);
+  const modelMenuRef       = useRef<HTMLDivElement>(null);
+  const templateMenuRef    = useRef<HTMLDivElement>(null);
   const [modelPos,    setModelPos]    = useState({ top: 0, left: 0, width: 0 });
   const [templatePos, setTemplatePos] = useState({ top: 0, left: 0, width: 0 });
 
@@ -540,6 +542,19 @@ export default function RunPage() {
     if (r) setTemplatePos({ top: r.bottom + 2, left: r.left, width: r.width });
     setTemplateOpen(v => !v); setModelOpen(false);
   }
+
+  /* click-outside closes dropdowns — no overlay needed */
+  useEffect(() => {
+    function onMouseDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (modelOpen && !modelTriggerRef.current?.contains(t) && !modelMenuRef.current?.contains(t))
+        setModelOpen(false);
+      if (templateOpen && !templateTriggerRef.current?.contains(t) && !templateMenuRef.current?.contains(t))
+        setTemplateOpen(false);
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [modelOpen, templateOpen]);
 
   /* ── Schema sub-tab ── */
   const [schemaTab, setSchemaTab] = useState<"manual" | "auto">("manual");
@@ -955,8 +970,7 @@ export default function RunPage() {
                           </button>
                           {modelOpen && (
                             <>
-                              <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
-                              <div className="fixed z-50 bg-white border py-1"
+                              <div ref={modelMenuRef} className="fixed z-50 bg-white border py-1"
                                    style={{ top: modelPos.top, left: modelPos.left, width: modelPos.width, borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
                                 {models.map(m => (
                                   <button key={m} onClick={() => { setModelSelected(m); setModelOpen(false); }}
@@ -1036,8 +1050,7 @@ export default function RunPage() {
                               </button>
                               {templateOpen && (
                                 <>
-                                  <div className="fixed inset-0 z-40" onClick={() => setTemplateOpen(false)} />
-                                  <div className="fixed z-50 bg-white border py-1 max-h-56 overflow-y-auto"
+                                  <div ref={templateMenuRef} className="fixed z-50 bg-white border py-1 max-h-56 overflow-y-auto"
                                        style={{ top: templatePos.top, left: templatePos.left, width: templatePos.width, borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
                                     {templateOptions.map(t => (
                                       <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
