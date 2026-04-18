@@ -1180,14 +1180,12 @@ export default function RunPage() {
                           ) : (
                             /* ── Display row — hover reveals borders, click to re-edit ── */
                             <>
-                              <div className="flex-1 px-2 py-1.5 cursor-text group/name" style={{ borderRight: "1px solid #e5e5e5" }}
-                                   onClick={() => updateRow(row.id, "editing", true)}>
+                              <div className="flex-1 px-2 py-1.5 cursor-text group/name"                                   onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/name:border-[#e5e5e5] flex items-center px-2 transition-colors">
                                   <span className="text-[14px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
                                 </div>
                               </div>
-                              <div className="flex-1 px-2 py-1.5 cursor-pointer group/type" style={{ borderRight: "1px solid #e5e5e5" }}
-                                   onClick={() => updateRow(row.id, "editing", true)}>
+                              <div className="flex-1 px-2 py-1.5 cursor-pointer group/type"                                   onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/type:border-[#e5e5e5] flex items-center justify-between px-2 transition-colors">
                                   <span className="text-[14px] text-[#0a0a0a] truncate">{row.type}</span>
                                   <span className="shrink-0 text-[#737373] opacity-0 group-hover/type:opacity-100 transition-opacity"><Ic.ChevronDown /></span>
