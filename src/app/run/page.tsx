@@ -385,7 +385,7 @@ export default function RunPage() {
   const [activeTab, setActiveTab]     = useState<"config" | "result">("config");
   const [fileUploaded, setFileUploaded] = useState(false);
   const [urlInput, setUrlInput]       = useState("");
-  const [modelSelected, setModelSelected] = useState("");
+  const [modelSelected, setModelSelected] = useState("Alpha (fast, accurate)");
   const [citationsOn, setCitationsOn] = useState(false);
   const [runState, setRunState]       = useState<"idle" | "loading" | "done">("idle");
 
@@ -504,7 +504,27 @@ export default function RunPage() {
   }
 
   const typeOptions = ["String", "Number", "Boolean", "Array", "Object"];
-  const models = ["GPT-4o (Standard)", "Claude 3.5 Sonnet", "Gemini 1.5 Pro", "GPT-4o Mini"];
+  const models = [
+    "Alpha (fast, accurate)",
+    "Beta (balanced, versatile)",
+    "Gamma (thorough, structured)",
+    "Delta (advanced reasoning, vision)",
+  ];
+  const templateOptions = [
+    "Policy document",
+    "endorsment",
+    "sds",
+    "990form",
+    "form420 Schema",
+    "272284939_202112_990EZ_2023030921062",
+    "272284939_202112_990EZ_202303092106257...",
+    "sebilargepdf",
+  ];
+
+  /* ── Dropdown open state ── */
+  const [modelOpen, setModelOpen]       = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [templateSelected, setTemplateSelected] = useState("");
 
   /* ─── Copy / Download handlers ─────────────────────────────────── */
   function handleCopy() {
@@ -907,13 +927,34 @@ export default function RunPage() {
                       <div className="flex flex-col gap-1">
                         <label className="text-[13px] font-medium text-[#737373]">Model</label>
                         <div className="relative">
-                          <select value={modelSelected} onChange={e => setModelSelected(e.target.value)}
-                                  className="w-full h-9 border bg-white px-3 text-[13px] text-[#0a0a0a] appearance-none outline-none cursor-pointer"
-                                  style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-                            <option value="">Select processing model</option>
-                            {models.map(m => <option key={m} value={m}>{m}</option>)}
-                          </select>
-                          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#737373]"><Ic.ChevronDown /></div>
+                          <button
+                            onClick={() => { setModelOpen(v => !v); setTemplateOpen(false); }}
+                            className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                            style={{ borderColor: modelOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: modelOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+                            <span className={modelSelected ? "text-[#0a0a0a]" : "text-[#a1a1aa]"}>
+                              {modelSelected || "Alpha (fast, accurate)"}
+                            </span>
+                            <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
+                          </button>
+                          {modelOpen && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
+                              <div className="absolute left-0 right-0 top-full mt-0.5 z-50 bg-white border py-1"
+                                   style={{ borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+                                {models.map(m => (
+                                  <button key={m} onClick={() => { setModelSelected(m); setModelOpen(false); }}
+                                          className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
+                                    {modelSelected === m && (
+                                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                      </span>
+                                    )}
+                                    {m}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                       {/* Citations */}
@@ -962,11 +1003,34 @@ export default function RunPage() {
                       <div className="flex flex-col gap-1 flex-1 min-w-0">
                         <label className="text-[13px] font-medium text-[#737373]">Template</label>
                         <div className="relative">
-                          <select className="w-full h-9 border bg-white px-3 text-[13px] text-[#a1a1aa] appearance-none outline-none cursor-pointer"
-                                  style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-                            <option value="">Browse pre-built field sets</option>
-                          </select>
-                          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#737373]"><Ic.ChevronDown /></div>
+                          <button
+                            onClick={() => { setTemplateOpen(v => !v); setModelOpen(false); }}
+                            className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                            style={{ borderColor: templateOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: templateOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+                            <span className={`truncate ${templateSelected ? "text-[#0a0a0a]" : "text-[#a1a1aa]"}`}>
+                              {templateSelected || "Browse pre-built field sets"}
+                            </span>
+                            <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
+                          </button>
+                          {templateOpen && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setTemplateOpen(false)} />
+                              <div className="absolute left-0 right-0 top-full mt-0.5 z-50 bg-white border py-1 max-h-60 overflow-y-auto"
+                                   style={{ borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+                                {templateOptions.map(t => (
+                                  <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
+                                          className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
+                                    {templateSelected === t && (
+                                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                      </span>
+                                    )}
+                                    <span className="truncate">{t}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
