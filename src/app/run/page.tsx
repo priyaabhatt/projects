@@ -1191,6 +1191,7 @@ export default function RunPage() {
                   </div>
                 )}
                   </div>
+                </div>
               )}
 
               {/* ── Result tab ── */}
