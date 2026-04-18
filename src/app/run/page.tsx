@@ -15,9 +15,9 @@ const Ic = {
     </svg>
   ),
   MoveLeft: () => (
-    /* Lucide ArrowLeft — proper back arrow */
+    /* Lucide MoveLeft — horizontal arrow with full-width line */
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+      <path d="M6 8L2 12L6 16"/><path d="M2 12H22"/>
     </svg>
   ),
   Play: () => (
@@ -41,9 +41,10 @@ const Ic = {
       <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/>
     </svg>
   ),
-  RotateCcw: () => (
+  Redo: () => (
+    /* Lucide Redo — used as zoom-reset in PDF toolbar */
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+      <path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>
     </svg>
   ),
   Upload: () => (
@@ -643,7 +644,7 @@ export default function RunPage() {
                     <Tooltip label="Reset zoom" placement="bottom">
                       <button onClick={zoomReset}
                               className="flex items-center justify-center w-8 h-8 text-[#737373] hover:text-[#171717] transition-colors">
-                        <Ic.RotateCcw />
+                        <Ic.Redo />
                       </button>
                     </Tooltip>
                   </div>
