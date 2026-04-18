@@ -525,6 +525,25 @@ export default function RunPage() {
   const [modelOpen, setModelOpen]       = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [templateSelected, setTemplateSelected] = useState("");
+  const modelTriggerRef    = useRef<HTMLButtonElement>(null);
+  const templateTriggerRef = useRef<HTMLButtonElement>(null);
+  const [modelPos,    setModelPos]    = useState({ top: 0, left: 0, width: 0 });
+  const [templatePos, setTemplatePos] = useState({ top: 0, left: 0, width: 0 });
+
+  function openModel() {
+    const r = modelTriggerRef.current?.getBoundingClientRect();
+    if (r) setModelPos({ top: r.bottom + 2, left: r.left, width: r.width });
+    setModelOpen(v => !v); setTemplateOpen(false);
+  }
+  function openTemplate() {
+    const r = templateTriggerRef.current?.getBoundingClientRect();
+    if (r) setTemplatePos({ top: r.bottom + 2, left: r.left, width: r.width });
+    setTemplateOpen(v => !v); setModelOpen(false);
+  }
+
+  /* ── Schema sub-tab ── */
+  const [schemaTab, setSchemaTab] = useState<"manual" | "auto">("manual");
+  const [autoSuggestText, setAutoSuggestText] = useState("");
 
   /* ─── Copy / Download handlers ─────────────────────────────────── */
   function handleCopy() {
@@ -927,23 +946,21 @@ export default function RunPage() {
                       <div className="flex flex-col gap-1">
                         <label className="text-[13px] font-medium text-[#737373]">Model</label>
                         <div className="relative">
-                          <button
-                            onClick={() => { setModelOpen(v => !v); setTemplateOpen(false); }}
+                          <button ref={modelTriggerRef}
+                            onClick={openModel}
                             className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
                             style={{ borderColor: modelOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: modelOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-                            <span className={modelSelected ? "text-[#0a0a0a]" : "text-[#a1a1aa]"}>
-                              {modelSelected || "Alpha (fast, accurate)"}
-                            </span>
+                            <span className="text-[#0a0a0a]">{modelSelected}</span>
                             <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
                           </button>
                           {modelOpen && (
                             <>
                               <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
-                              <div className="absolute left-0 right-0 top-full mt-0.5 z-50 bg-white border py-1"
-                                   style={{ borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+                              <div className="fixed z-50 bg-white border py-1"
+                                   style={{ top: modelPos.top, left: modelPos.left, width: modelPos.width, borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
                                 {models.map(m => (
                                   <button key={m} onClick={() => { setModelSelected(m); setModelOpen(false); }}
-                                          className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
+                                          className="w-full flex items-center gap-2 pl-8 pr-3 py-2 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
                                     {modelSelected === m && (
                                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -984,56 +1001,61 @@ export default function RunPage() {
                     </div>
                     {/* Schema sub-tabs */}
                     <div className="flex items-center border-b" style={{ borderColor: "#e5e5e5" }}>
-                      <button className="flex items-center gap-1.5 px-2 py-2 text-[13px] font-medium text-[#0a0a0a] border-b-2 border-[#171717]">
+                      <button onClick={() => setSchemaTab("manual")}
+                              className={`flex items-center gap-1.5 px-2 py-2 text-[13px] font-medium transition-colors border-b-2 ${schemaTab === "manual" ? "text-[#0a0a0a] border-[#171717]" : "text-[#737373] border-transparent hover:text-[#0a0a0a]"}`}>
                         <Ic.PenLine /> Manual
                       </button>
-                      <button className="flex items-center gap-1.5 px-2 py-2 text-[13px] font-medium text-[#737373] hover:text-[#0a0a0a] transition-colors">
+                      <button onClick={() => setSchemaTab("auto")}
+                              className={`flex items-center gap-1.5 px-2 py-2 text-[13px] font-medium transition-colors border-b-2 ${schemaTab === "auto" ? "text-[#0a0a0a] border-[#171717]" : "text-[#737373] border-transparent hover:text-[#0a0a0a]"}`}>
                         <Ic.Sparkles /> Auto-Suggest
                         <span className="px-1 py-0.5 text-[10px] font-medium text-violet-700 bg-violet-100 leading-4">Beta</span>
                       </button>
                     </div>
-                    {/* Name + Template */}
-                    <div className="flex gap-4">
-                      <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <label className="text-[13px] font-medium text-[#737373]">Name</label>
-                        <input type="text" placeholder="e.g. Invoice processing"
-                               className="h-9 border bg-white px-3 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
-                               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }} />
-                      </div>
-                      <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <label className="text-[13px] font-medium text-[#737373]">Template</label>
-                        <div className="relative">
-                          <button
-                            onClick={() => { setTemplateOpen(v => !v); setModelOpen(false); }}
-                            className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
-                            style={{ borderColor: templateOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: templateOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-                            <span className={`truncate ${templateSelected ? "text-[#0a0a0a]" : "text-[#a1a1aa]"}`}>
-                              {templateSelected || "Browse pre-built field sets"}
-                            </span>
-                            <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
-                          </button>
-                          {templateOpen && (
-                            <>
-                              <div className="fixed inset-0 z-40" onClick={() => setTemplateOpen(false)} />
-                              <div className="absolute left-0 right-0 top-full mt-0.5 z-50 bg-white border py-1 max-h-60 overflow-y-auto"
-                                   style={{ borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
-                                {templateOptions.map(t => (
-                                  <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
-                                          className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
-                                    {templateSelected === t && (
-                                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                      </span>
-                                    )}
-                                    <span className="truncate">{t}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </>
-                          )}
+
+                    {schemaTab === "manual" ? (
+                      /* ── Manual: Name + Template + table ── */
+                      <>
+                        <div className="flex gap-4">
+                          <div className="flex flex-col gap-1 flex-1 min-w-0">
+                            <label className="text-[13px] font-medium text-[#737373]">Name</label>
+                            <input type="text" placeholder="e.g. Invoice processing"
+                                   className="h-9 border bg-white px-3 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
+                                   style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }} />
+                          </div>
+                          <div className="flex flex-col gap-1 flex-1 min-w-0">
+                            <label className="text-[13px] font-medium text-[#737373]">Template</label>
+                            <div className="relative">
+                              <button ref={templateTriggerRef}
+                                onClick={openTemplate}
+                                className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                                style={{ borderColor: templateOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: templateOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+                                <span className={`truncate ${templateSelected ? "text-[#0a0a0a]" : "text-[#a1a1aa]"}`}>
+                                  {templateSelected || "Browse pre-built field sets"}
+                                </span>
+                                <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
+                              </button>
+                              {templateOpen && (
+                                <>
+                                  <div className="fixed inset-0 z-40" onClick={() => setTemplateOpen(false)} />
+                                  <div className="fixed z-50 bg-white border py-1 max-h-56 overflow-y-auto"
+                                       style={{ top: templatePos.top, left: templatePos.left, width: templatePos.width, borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+                                    {templateOptions.map(t => (
+                                      <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
+                                              className="w-full flex items-center gap-2 pl-8 pr-3 py-2 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
+                                        {templateSelected === t && (
+                                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                          </span>
+                                        )}
+                                        <span className="truncate">{t}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
 
                     {/* Schema table */}
                     <div className="border flex flex-col" style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
@@ -1112,8 +1134,50 @@ export default function RunPage() {
                         </button>
                       </div>
                     </div>
+                  </>
+                ) : (
+                  /* ── Auto-Suggest tab ── */
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[13px] font-medium text-[#737373]">
+                        Describe what fields to extract from your document
+                      </label>
+                      <textarea
+                        value={autoSuggestText}
+                        onChange={e => setAutoSuggestText(e.target.value)}
+                        placeholder="e.g. Extract the invoice number, vendor name, line items with quantities and unit prices, subtotal, tax amount, and total amount due."
+                        className="w-full border bg-white px-3 py-2 text-[13px] text-[#0a0a0a] outline-none resize-none placeholder:text-[#a1a1aa] leading-5"
+                        style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)", height: 150 }}
+                      />
+                    </div>
+                    <button
+                      disabled={!autoSuggestText.trim()}
+                      className="flex items-center justify-center gap-2 h-9 px-4 text-[13px] font-medium transition-all self-start"
+                      style={autoSuggestText.trim() ? {
+                        background: "#171717", color: "#fafafa", cursor: "pointer",
+                      } : {
+                        background: "#171717", color: "#fafafa", opacity: 0.4, cursor: "not-allowed",
+                      }}>
+                      <Ic.Sparkles />
+                      Generate schema
+                    </button>
+                    {/* Placeholder for generated results */}
+                    {autoSuggestText.trim() === "" && (
+                      <div className="flex flex-col items-center justify-center gap-2 py-8 border border-dashed"
+                           style={{ borderColor: "#e5e5e5" }}>
+                        <span className="text-[#737373]">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                          </svg>
+                        </span>
+                        <p className="text-[13px] text-[#737373] text-center max-w-[260px] leading-5">
+                          Describe your extraction goal above and we'll suggest a schema for you.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
+                  </div>
               )}
 
               {/* ── Result tab ── */}
