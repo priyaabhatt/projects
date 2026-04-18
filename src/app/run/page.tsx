@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
+import type { ReactNode, CSSProperties } from "react";
 import Link from "next/link";
 
 /* ─── Inline SVG icons (Lucide-style, 24-viewBox, 16px display, stroke 1.5) */
@@ -137,7 +139,7 @@ const Ic = {
 };
 
 /* ─── Tooltip wrapper ────────────────────────────────────────────── */
-function Tooltip({ label, children, placement = "top" }: { label: string; children: React.ReactNode; placement?: "top" | "bottom" | "right" }) {
+function Tooltip({ label, children, placement = "top" }: { label: string; children: ReactNode; placement?: "top" | "bottom" | "right" }) {
   const posClass =
     placement === "top"    ? "bottom-full mb-2 left-1/2 -translate-x-1/2" :
     placement === "bottom" ? "top-full mt-2 left-1/2 -translate-x-1/2" :
@@ -232,25 +234,25 @@ In the bottom-right foreground, the back of a person's head and shoulder are par
 `;
 
 /* ─── PDF page rendered as styled HTML ───────────────────────────── */
-function Hl({ on, children }: { on: boolean; children: React.ReactNode }) {
+function Hl({ on, children }: { on: boolean; children: ReactNode }) {
   return on
     ? <mark style={{ background: "rgba(253,224,71,0.45)", borderRadius: 2, padding: "0 1px" }}>{children}</mark>
     : <>{children}</>;
 }
 
 function PdfPageContent({ page, highlight }: { page: number; highlight: boolean }) {
-  const bodyStyle: React.CSSProperties = {
+  const bodyStyle: CSSProperties = {
     fontFamily: "'Times New Roman', Times, serif",
     fontSize: "10.5pt",
     lineHeight: 1.68,
     color: "#111",
   };
-  const h1Style: React.CSSProperties = { fontWeight: "bold", fontSize: "11pt", letterSpacing: "0.06em", textAlign: "center", marginBottom: 22 };
-  const secHead: React.CSSProperties = { display: "flex", gap: 14, fontWeight: "bold", marginBottom: 6 };
-  const numCol: React.CSSProperties = { minWidth: 22, flexShrink: 0 };
-  const body: React.CSSProperties = { paddingLeft: 36, marginBottom: 8, textAlign: "justify" } as React.CSSProperties;
-  const ul: React.CSSProperties = { paddingLeft: 52, margin: "0 0 12px", display: "flex", flexDirection: "column", gap: 4 };
-  const footer: React.CSSProperties = { borderTop: "1px solid #ccc", marginTop: 32, paddingTop: 8, textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.06em" };
+  const h1Style: CSSProperties = { fontWeight: "bold", fontSize: "11pt", letterSpacing: "0.06em", textAlign: "center", marginBottom: 22 };
+  const secHead: CSSProperties = { display: "flex", gap: 14, fontWeight: "bold", marginBottom: 6 };
+  const numCol: CSSProperties = { minWidth: 22, flexShrink: 0 };
+  const body: CSSProperties = { paddingLeft: 36, marginBottom: 8, textAlign: "justify" } as CSSProperties;
+  const ul: CSSProperties = { paddingLeft: 52, margin: "0 0 12px", display: "flex", flexDirection: "column", gap: 4 };
+  const footer: CSSProperties = { borderTop: "1px solid #ccc", marginTop: 32, paddingTop: 8, textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.06em" };
 
   if (page !== 12) {
     // Generic page for all other page numbers
@@ -402,6 +404,8 @@ export default function RunPage() {
   const ZOOM_MIN  = 25;
   const ZOOM_MAX  = 300;
   const DEFAULT_ZOOM = 100;
+  const pdfScrollRef = useRef<HTMLDivElement>(null);
+  const pageRefs     = useRef<(HTMLDivElement | null)[]>([]);
 
   /* ── Loading animation state ── */
   const [progress, setProgress]         = useState(0);
@@ -428,8 +432,20 @@ export default function RunPage() {
   const canRun  = hasFile && modelSelected !== "";
 
   /* ─── Page navigation ───────────────────────────────────────────── */
-  function prevPage() { if (currentPage > 1) setCurrentPage(p => p - 1); }
-  function nextPage() { if (currentPage < totalPages) setCurrentPage(p => p + 1); }
+  function prevPage() {
+    if (currentPage > 1) {
+      const target = currentPage - 1;
+      setCurrentPage(target);
+      pageRefs.current[target - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+  function nextPage() {
+    if (currentPage < totalPages) {
+      const target = currentPage + 1;
+      setCurrentPage(target);
+      pageRefs.current[target - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   /* ─── Zoom ──────────────────────────────────────────────────────── */
   function zoomIn()    { setZoomLevel(z => Math.min(ZOOM_MAX, z + ZOOM_STEP)); }
@@ -520,6 +536,10 @@ export default function RunPage() {
     "272284939_202112_990EZ_202303092106257...",
     "sebilargepdf",
   ];
+
+  /* ── Portal mount guard ── */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   /* ── Dropdown open state ── */
   const [modelOpen, setModelOpen]       = useState(false);
@@ -705,8 +725,9 @@ export default function RunPage() {
                 </div>
 
                 {/* PDF content */}
-                <div className="flex-1 min-h-0 overflow-auto flex flex-col items-center py-4 gap-3"
-                     style={{ background: "#f5f5f5" }}>
+                <div ref={pdfScrollRef}
+                     className="flex-1 min-h-0 overflow-auto flex flex-col items-center py-4 gap-3"
+                     style={{ background: "#f5f5f5", scrollBehavior: "smooth" }}>
                   <div style={{
                     transform: `scale(${zoomLevel / 100})`,
                     transformOrigin: "top center",
@@ -718,9 +739,11 @@ export default function RunPage() {
                     paddingLeft: 16,
                     paddingRight: 16,
                   }}>
-                    {/* Designed PDF pages — fill canvas width, show up to 6 pages */}
-                    {Array.from({ length: Math.min(6, totalPages - currentPage + 1) }, (_, i) => currentPage + i).map(pg => (
-                      <div key={pg} className="w-full bg-white shadow-sm" style={{ padding: "52px 60px", minHeight: 680 }}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(pg => (
+                      <div key={pg}
+                           ref={el => { pageRefs.current[pg - 1] = el; }}
+                           className="w-full bg-white shadow-sm"
+                           style={{ padding: "52px 60px", minHeight: 680 }}>
                         <PdfPageContent page={pg} highlight={citationsOn && runState === "done"} />
                       </div>
                     ))}
@@ -968,24 +991,7 @@ export default function RunPage() {
                             <span className="text-[#0a0a0a]">{modelSelected}</span>
                             <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
                           </button>
-                          {modelOpen && (
-                            <>
-                              <div ref={modelMenuRef} className="fixed z-50 bg-white border py-1"
-                                   style={{ top: modelPos.top, left: modelPos.left, width: modelPos.width, borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
-                                {models.map(m => (
-                                  <button key={m} onClick={() => { setModelSelected(m); setModelOpen(false); }}
-                                          className="w-full flex items-center gap-2 pl-8 pr-3 py-2 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
-                                    {modelSelected === m && (
-                                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                      </span>
-                                    )}
-                                    {m}
-                                  </button>
-                                ))}
-                              </div>
-                            </>
-                          )}
+                          {/* model menu rendered via portal at root */}
                         </div>
                       </div>
                       {/* Citations */}
@@ -1048,24 +1054,7 @@ export default function RunPage() {
                                 </span>
                                 <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
                               </button>
-                              {templateOpen && (
-                                <>
-                                  <div ref={templateMenuRef} className="fixed z-50 bg-white border py-1 max-h-56 overflow-y-auto"
-                                       style={{ top: templatePos.top, left: templatePos.left, width: templatePos.width, borderColor: "#e5e5e5", boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
-                                    {templateOptions.map(t => (
-                                      <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
-                                              className="w-full flex items-center gap-2 pl-8 pr-3 py-2 text-[13px] text-[#0a0a0a] text-left hover:bg-[#f5f5f5] transition-colors relative">
-                                        {templateSelected === t && (
-                                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0a0a0a]">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                          </span>
-                                        )}
-                                        <span className="truncate">{t}</span>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </>
-                              )}
+                              {/* template menu rendered via portal at root */}
                             </div>
                           </div>
                         </div>
@@ -1301,6 +1290,56 @@ export default function RunPage() {
 
         </div>
       </div>
+
+      {/* ── Dropdown portals — rendered at document.body, escape all overflow containers ── */}
+      {mounted && modelOpen && createPortal(
+        <div ref={modelMenuRef}
+             style={{ position: "fixed", zIndex: 9999, top: modelPos.top, left: modelPos.left, width: modelPos.width,
+                      background: "white", border: "1px solid #e5e5e5", padding: "4px 0",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+          {models.map(m => (
+            <button key={m} onClick={() => { setModelSelected(m); setModelOpen(false); }}
+                    style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 12,
+                             paddingTop: 8, paddingBottom: 8, fontSize: 13, color: "#0a0a0a", textAlign: "left",
+                             background: "none", border: "none", cursor: "pointer", position: "relative" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+              {modelSelected === m && (
+                <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#0a0a0a" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              )}
+              {m}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+
+      {mounted && templateOpen && createPortal(
+        <div ref={templateMenuRef}
+             style={{ position: "fixed", zIndex: 9999, top: templatePos.top, left: templatePos.left, width: templatePos.width,
+                      background: "white", border: "1px solid #e5e5e5", padding: "4px 0",
+                      maxHeight: 224, overflowY: "auto",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+          {templateOptions.map(t => (
+            <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
+                    style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 12,
+                             paddingTop: 8, paddingBottom: 8, fontSize: 13, color: "#0a0a0a", textAlign: "left",
+                             background: "none", border: "none", cursor: "pointer", position: "relative" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+              {templateSelected === t && (
+                <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#0a0a0a" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              )}
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t}</span>
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
 
       <style>{`
         @keyframes fadeIn         { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
