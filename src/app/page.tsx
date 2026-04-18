@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 /* ─── Inline SVG icons (only for things with no Figma asset) ─────── */
 const IcPanelClose = () => (
@@ -380,11 +381,11 @@ export default function PlaygroundPage() {
                         </div>
                         <p className="text-[13px] font-medium text-neutral-800 whitespace-nowrap">{title}</p>
                       </div>
-                      <button className="flex items-center gap-1.5 px-3 py-1.5 border bg-white text-[13px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
+                      <Link href="/run" className="flex items-center gap-1.5 px-3 py-1.5 border bg-white text-[13px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
                               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                         Try
                         <IcChevronR />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 ))}
