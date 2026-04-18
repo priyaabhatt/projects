@@ -217,6 +217,16 @@ const statusMessages = [
 
 type SchemaRow = { id: number; name: string; type: string; desc: string; editing: boolean };
 
+/* ─── Citation map: result section → PDF page + highlight region ──── */
+type CitationRef = { page: number; top: number; left: number; width: number; height: number };
+const CITATIONS: Record<string, CitationRef> = {
+  "image-desc":   { page: 1,  top: 18, left: 8,  width: 84, height: 14 },
+  "delivery-bag": { page: 12, top: 24, left: 12,  width: 81, height: 28 },
+  "the-setting":  { page: 8,  top: 42, left: 8,  width: 84, height: 26 },
+  "the-person":   { page: 15, top: 52, left: 8,  width: 84, height: 16 },
+  "the-image":    { page: 5,  top: 22, left: 8,  width: 84, height: 38 },
+};
+
 /* ─── Preview result text (used for copy / download) ─────────────── */
 const PREVIEW_CONTENT = `## Image Description
 
@@ -401,8 +411,10 @@ export default function RunPage() {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [urlInput, setUrlInput]       = useState("");
   const [modelSelected, setModelSelected] = useState("Alpha (fast, accurate)");
-  const [citationsOn, setCitationsOn] = useState(false);
-  const [runState, setRunState]       = useState<"idle" | "loading" | "done">("idle");
+  const [citationsOn, setCitationsOn]   = useState(false);
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+  const [activeSection, setActiveSection]   = useState<string | null>(null);
+  const [runState, setRunState]         = useState<"idle" | "loading" | "done">("idle");
 
   /* ── Result panel sub-state ── */
   const [resultTab, setResultTab]     = useState<"preview" | "markdown" | "json">("preview");
@@ -464,6 +476,20 @@ export default function RunPage() {
   function zoomIn()    { setZoomLevel(z => Math.min(ZOOM_MAX, z + ZOOM_STEP)); }
   function zoomOut()   { setZoomLevel(z => Math.max(ZOOM_MIN, z - ZOOM_STEP)); }
   function zoomReset() { setZoomLevel(DEFAULT_ZOOM); }
+
+  /* ─── Source citation derived state ────────────────────────────── */
+  const citedId       = citationsOn ? (hoveredSection ?? activeSection) : null;
+  const activeCitation = citedId ? (CITATIONS[citedId] ?? null) : null;
+
+  useEffect(() => {
+    if (!activeCitation) return;
+    const pg = activeCitation.page;
+    setCurrentPage(pg);
+    requestAnimationFrame(() => {
+      pageRefs.current[pg - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCitation?.page, citedId]);
 
   /* ─── Loading animation ─────────────────────────────────────────── */
   function startLoading() {
@@ -748,8 +774,26 @@ export default function RunPage() {
                       <div key={pg}
                            ref={el => { pageRefs.current[pg - 1] = el; }}
                            className="w-full bg-white shadow-sm"
-                           style={{ padding: "52px 60px", minHeight: 680 }}>
+                           style={{ position: "relative", padding: "52px 60px", minHeight: 680 }}>
                         <PdfPageContent page={pg} highlight={citationsOn && runState === "done"} />
+                        {/* Citation highlight overlay */}
+                        {activeCitation && activeCitation.page === pg && (
+                          <div
+                            key={citedId}
+                            style={{
+                              position: "absolute",
+                              top: `${activeCitation.top}%`,
+                              left: `${activeCitation.left}%`,
+                              width: `${activeCitation.width}%`,
+                              height: `${activeCitation.height}%`,
+                              background: "rgba(37,99,235,0.1)",
+                              border: "2px solid rgba(37,99,235,0.45)",
+                              pointerEvents: "none",
+                              animation: "fadeIn 0.25s ease",
+                              borderRadius: 2,
+                            }}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -909,7 +953,7 @@ export default function RunPage() {
                   <div className="flex items-center gap-2 mr-1">
                     <span className="text-[12px] text-[#737373] whitespace-nowrap">Source highlighting</span>
                     <button
-                      onClick={() => setCitationsOn(v => !v)}
+                      onClick={() => setCitationsOn(v => { if (v) { setActiveSection(null); setHoveredSection(null); } return !v; })}
                       className="flex items-center px-0.5 shrink-0 transition-colors"
                       style={{ width: 36, height: 20, background: citationsOn ? "#171717" : "#e5e5e5", transition: "background 0.2s" }}
                     >
@@ -1005,7 +1049,7 @@ export default function RunPage() {
                       {/* Citations */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[14px] font-medium text-[#737373]">Citations Extraction</label>
-                        <button className="flex items-center gap-3 h-9" onClick={() => setCitationsOn(v => !v)}>
+                        <button className="flex items-center gap-3 h-9" onClick={() => setCitationsOn(v => { if (v) { setActiveSection(null); setHoveredSection(null); } return !v; })}>
                           <div className="flex items-center px-0.5 shrink-0"
                                style={{ width: 36, height: 20, background: citationsOn ? "#171717" : "#e5e5e5", transition: "background 0.2s" }}>
                             <div className="bg-white shrink-0" style={{
@@ -1246,11 +1290,27 @@ export default function RunPage() {
               {/* ── Result tab ── */}
               {activeTab === "result" && runState === "done" && (
                 <div className="flex-1 min-h-0 overflow-auto">
-                  {resultTab === "preview" && (
+                  {resultTab === "preview" && (() => {
+                    /* Helper: returns props for a citable section container */
+                    function citeProps(id: string) {
+                      const isActive = citationsOn && (hoveredSection === id || activeSection === id);
+                      return {
+                        onMouseEnter: citationsOn ? () => setHoveredSection(id) : undefined,
+                        onMouseLeave: citationsOn ? () => setHoveredSection(null) : undefined,
+                        onClick: citationsOn ? () => setActiveSection(a => a === id ? null : id) : undefined,
+                        style: {
+                          cursor: citationsOn ? "pointer" : "default",
+                          border: isActive ? "1px solid #2563eb" : "1px solid transparent",
+                          background: isActive ? "#eff6ff" : "transparent",
+                          transition: "background 0.18s ease, border-color 0.18s ease",
+                        } as CSSProperties,
+                      };
+                    }
+                    return (
                     <div className="flex flex-col gap-3 p-[10px]">
 
                       {/* Image Description */}
-                      <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-col gap-0.5" {...citeProps("image-desc")}>
                         <div className="p-2">
                           <p className="text-[16px] font-semibold text-[#171717] leading-none">Image Description</p>
                         </div>
@@ -1262,7 +1322,7 @@ export default function RunPage() {
                       </div>
 
                       {/* The Delivery Bag */}
-                      <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-col gap-0.5" {...citeProps("delivery-bag")}>
                         <div className="p-2">
                           <p className="text-[16px] font-semibold text-[#171717] leading-none">The Delivery Bag</p>
                         </div>
@@ -1279,7 +1339,7 @@ export default function RunPage() {
                       </div>
 
                       {/* The Setting */}
-                      <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-col gap-0.5" {...citeProps("the-setting")}>
                         <div className="p-2">
                           <p className="text-[16px] font-semibold text-[#171717] leading-none">The Setting</p>
                         </div>
@@ -1295,7 +1355,7 @@ export default function RunPage() {
                       </div>
 
                       {/* The Person */}
-                      <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-col gap-0.5" {...citeProps("the-person")}>
                         <div className="p-2">
                           <p className="text-[16px] font-semibold text-[#171717] leading-none">The Person</p>
                         </div>
@@ -1307,9 +1367,12 @@ export default function RunPage() {
                       </div>
 
                       {/* Image representation */}
-                      <div style={{
+                      <div {...citeProps("the-image")} style={{
+                        ...(citeProps("the-image").style),
                         width: "100%", aspectRatio: "3573/1049", position: "relative", overflow: "hidden",
-                        background: "linear-gradient(135deg, #0d1a0d 0%, #1a2e1a 40%, #1c2b1c 60%, #0d190d 100%)",
+                        background: citationsOn && (hoveredSection === "the-image" || activeSection === "the-image")
+                          ? "#eff6ff"
+                          : "linear-gradient(135deg, #0d1a0d 0%, #1a2e1a 40%, #1c2b1c 60%, #0d190d 100%)",
                       }}>
                         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 80%, rgba(34,197,94,0.35) 0%, transparent 55%)" }} />
                         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 70% 60%, rgba(21,128,61,0.25) 0%, transparent 50%)" }} />
@@ -1346,7 +1409,8 @@ export default function RunPage() {
                       </div>
 
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {resultTab === "markdown" && (
                     <div className="flex items-center justify-center py-20 text-[14px] text-[#a1a1aa]">
