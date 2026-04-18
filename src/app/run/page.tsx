@@ -161,7 +161,7 @@ function Tooltip({ label, children, placement = "top" }: { label: string; childr
   return (
     <div className="relative group flex items-center justify-center">
       {children}
-      <span className={`pointer-events-none absolute z-50 px-2 py-1 bg-[#171717] text-[#fafafa] text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity ${posClass}`}>
+      <span className={`pointer-events-none absolute z-50 px-2 py-1 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity ${posClass}`}>
         {label}
       </span>
     </div>
@@ -190,7 +190,7 @@ function CircularProgress({ percent }: { percent: number }) {
           style={{ transition: "stroke-dasharray 0.3s ease" }}
         />
       </svg>
-      <span className="text-[11px] font-medium text-[#171717] z-10 leading-none">{Math.round(percent)}%</span>
+      <span className="text-[12px] font-medium text-[#171717] z-10 leading-none">{Math.round(percent)}%</span>
     </div>
   );
 }
@@ -635,7 +635,7 @@ export default function RunPage() {
       {/* ══════ DOWNLOAD TOAST ═══════════════════════════════════════ */}
       {dlToastState !== "hidden" && (
         <div
-          className="fixed top-4 right-5 z-50 flex items-center gap-2 bg-white border border-[#e5e5e5] px-4 py-2 text-[13px] font-medium text-[#0a0a0a]"
+          className="fixed top-4 right-5 z-50 flex items-center gap-2 bg-white border border-[#e5e5e5] px-4 py-2 text-[14px] font-medium text-[#0a0a0a]"
           style={{
             boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
             animation: dlToastState === "in"
@@ -653,7 +653,7 @@ export default function RunPage() {
            style={{ height: 49, borderColor: "#e4e4e7", background: "#fafafa" }}>
         {/* Back */}
         <Link href="/"
-              className="flex items-center gap-1.5 px-1.5 py-1.5 border bg-white text-[13px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
+              className="flex items-center gap-1.5 px-1.5 py-1.5 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
           <Ic.MoveLeft />
           <span>Back</span>
@@ -705,11 +705,11 @@ export default function RunPage() {
                         <Ic.ChevronLeft />
                       </button>
                     </Tooltip>
-                    <div className="flex items-center justify-center border bg-white text-[13px] font-medium text-[#0a0a0a] shrink-0"
+                    <div className="flex items-center justify-center border bg-white text-[14px] font-medium text-[#0a0a0a] shrink-0"
                          style={{ width: 42, height: 32, borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                       {currentPage}
                     </div>
-                    <span className="px-2 text-[13px] font-medium text-[#737373]">of {totalPages}</span>
+                    <span className="px-2 text-[14px] font-medium text-[#737373]">of {totalPages}</span>
                     <Tooltip label="Next page" placement="bottom">
                       <button
                         onClick={nextPage}
@@ -729,7 +729,7 @@ export default function RunPage() {
                         <Ic.ZoomIn />
                       </button>
                     </Tooltip>
-                    <div className="flex items-center justify-center border bg-white text-[13px] font-medium text-[#737373] shrink-0"
+                    <div className="flex items-center justify-center border bg-white text-[14px] font-medium text-[#737373] shrink-0"
                          style={{ height: 32, paddingLeft: 10, paddingRight: 10, borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                       {zoomLevel}%
                     </div>
@@ -777,7 +777,7 @@ export default function RunPage() {
               </>
             ) : (
               /* Upload area */
-              <div className="flex-1 flex items-center justify-center p-8" style={{ background: "#f5f5f5" }}>
+              <div className="flex-1 flex items-center justify-center p-4" style={{ background: "#f5f5f5" }}>
                 <div className="w-full h-full border border-dashed border-[#d1d1d1] bg-white flex items-center justify-center">
                   <div className="flex flex-col gap-6 items-center w-[340px]">
                     <div className="flex flex-col gap-4 items-center text-center w-full">
@@ -854,7 +854,7 @@ export default function RunPage() {
               {/* Tab bar */}
               <div className="flex items-center h-9 px-0.5 py-0.5 bg-[#f5f5f5]" style={{ width: 219 }}>
                 <button
-                  className="flex items-center gap-1.5 px-2 py-1 text-[13px] font-medium text-[#171717] transition-colors"
+                  className="flex items-center gap-1.5 px-2 py-1 text-[14px] font-medium text-[#171717] transition-colors"
                   style={{
                     background: activeTab === "config" ? "white" : "transparent",
                     border: activeTab === "config" ? "1px solid #e5e5e5" : "1px solid transparent",
@@ -865,7 +865,7 @@ export default function RunPage() {
                 </button>
                 <Tooltip label={runState !== "done" ? "Fill in all fields and run Parse to see results here." : "Results"} placement="bottom">
                   <button
-                    className="flex items-center gap-1.5 px-2 py-1 text-[13px] font-medium text-[#171717] transition-all"
+                    className="flex items-center gap-1.5 px-2 py-1 text-[14px] font-medium text-[#171717] transition-all"
                     style={{
                       background: activeTab === "result" ? "white" : "transparent",
                       border: activeTab === "result" ? "1px solid #e5e5e5" : "1px solid transparent",
@@ -912,7 +912,7 @@ export default function RunPage() {
                     <button
                       key={tab}
                       onClick={() => setResultTab(tab)}
-                      className="h-full text-[13px] font-medium capitalize transition-colors border-b-2"
+                      className="h-full text-[14px] font-medium capitalize transition-colors border-b-2"
                       style={{
                         borderColor: resultTab === tab ? "#171717" : "transparent",
                         color: resultTab === tab ? "#171717" : "#737373",
@@ -974,7 +974,7 @@ export default function RunPage() {
                   <div className="flex flex-col items-center gap-1">
                     <CircularProgress percent={progress} />
                     <div className="h-9 flex items-center justify-center">
-                      <span className="text-[13px] font-medium text-[#737373]">
+                      <span className="text-[14px] font-medium text-[#737373]">
                         {statusMessages[statusIdx]}{".".repeat(dotCount)}
                       </span>
                     </div>
@@ -984,7 +984,7 @@ export default function RunPage() {
                     <div className="flex items-start pt-0.5 shrink-0">
                       <img src="/assets/ic-info-circle.svg" width={18} height={18} alt="" />
                     </div>
-                    <p className="text-[13px] font-medium text-[#0a0a0a] leading-5 flex-1 min-w-0" key={toastIdx}
+                    <p className="text-[14px] font-medium text-[#0a0a0a] leading-5 flex-1 min-w-0" key={toastIdx}
                        style={{ animation: "fadeIn 0.4s ease" }}>
                       {toastMessages[toastIdx]}
                     </p>
@@ -1000,18 +1000,18 @@ export default function RunPage() {
                   <div className="border p-3 flex flex-col gap-4" style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <Ic.TableProp /><p className="text-[15px] font-medium text-[#0a0a0a]">Configure fields</p>
+                        <Ic.TableProp /><p className="text-[16px] font-medium text-[#0a0a0a]">Configure fields</p>
                       </div>
-                      <p className="text-[13px] text-[#737373] leading-5">Tell us what to extract and how to process it.</p>
+                      <p className="text-[14px] text-[#737373] leading-5">Tell us what to extract and how to process it.</p>
                     </div>
                     <div className="flex flex-col gap-4">
                       {/* Model */}
                       <div className="flex flex-col gap-1">
-                        <label className="text-[13px] font-medium text-[#737373]">Model</label>
+                        <label className="text-[14px] font-medium text-[#737373]">Model</label>
                         <div className="relative">
                           <button ref={modelTriggerRef}
                             onClick={openModel}
-                            className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                            className="w-full h-9 border bg-white px-3 text-[14px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
                             style={{ borderColor: modelOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: modelOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                             <span className="text-[#0a0a0a]">{modelSelected}</span>
                             <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
@@ -1021,7 +1021,7 @@ export default function RunPage() {
                       </div>
                       {/* Citations */}
                       <div className="flex flex-col gap-1">
-                        <label className="text-[13px] font-medium text-[#737373]">Citations Extraction</label>
+                        <label className="text-[14px] font-medium text-[#737373]">Citations Extraction</label>
                         <button className="flex items-center gap-3 h-9" onClick={() => setCitationsOn(v => !v)}>
                           <div className="flex items-center px-0.5 shrink-0"
                                style={{ width: 36, height: 20, background: citationsOn ? "#171717" : "#e5e5e5", transition: "background 0.2s" }}>
@@ -1032,7 +1032,7 @@ export default function RunPage() {
                               boxShadow: "0 1px 3px rgba(0,0,0,0.2)"
                             }} />
                           </div>
-                          <span className="text-[13px] font-medium text-[#0a0a0a]">Highlight source in PDF</span>
+                          <span className="text-[14px] font-medium text-[#0a0a0a]">Highlight source in PDF</span>
                         </button>
                       </div>
                     </div>
@@ -1041,19 +1041,19 @@ export default function RunPage() {
                   {/* Schema */}
                   <div className="border p-3 flex flex-col gap-4" style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                     <div className="flex flex-col gap-1">
-                      <p className="text-[15px] font-medium text-[#0a0a0a]">Schema</p>
-                      <p className="text-[13px] text-[#737373] leading-5">Define which fields to extract from the document.</p>
+                      <p className="text-[16px] font-medium text-[#0a0a0a]">Schema</p>
+                      <p className="text-[14px] text-[#737373] leading-5">Define which fields to extract from the document.</p>
                     </div>
                     {/* Schema sub-tabs */}
                     <div className="flex items-center border-b" style={{ borderColor: "#e5e5e5" }}>
                       <button onClick={() => setSchemaTab("manual")}
-                              className={`flex items-center gap-1.5 px-2 py-2 text-[13px] font-medium transition-colors border-b-2 ${schemaTab === "manual" ? "text-[#0a0a0a] border-[#171717]" : "text-[#737373] border-transparent hover:text-[#0a0a0a]"}`}>
+                              className={`flex items-center gap-1.5 px-2 py-2 text-[14px] font-medium transition-colors border-b-2 ${schemaTab === "manual" ? "text-[#0a0a0a] border-[#171717]" : "text-[#737373] border-transparent hover:text-[#0a0a0a]"}`}>
                         <Ic.PenLine /> Manual
                       </button>
                       <button onClick={() => setSchemaTab("auto")}
-                              className={`flex items-center gap-1.5 px-2 py-2 text-[13px] font-medium transition-colors border-b-2 ${schemaTab === "auto" ? "text-[#0a0a0a] border-[#171717]" : "text-[#737373] border-transparent hover:text-[#0a0a0a]"}`}>
+                              className={`flex items-center gap-1.5 px-2 py-2 text-[14px] font-medium transition-colors border-b-2 ${schemaTab === "auto" ? "text-[#0a0a0a] border-[#171717]" : "text-[#737373] border-transparent hover:text-[#0a0a0a]"}`}>
                         <Ic.Sparkles /> Auto-Suggest
-                        <span className="px-1 py-0.5 text-[10px] font-medium text-violet-700 bg-violet-100 leading-4">Beta</span>
+                        <span className="px-1 py-0.5 text-[12px] font-medium text-violet-700 bg-violet-100 leading-4">Beta</span>
                       </button>
                     </div>
 
@@ -1062,17 +1062,17 @@ export default function RunPage() {
                       <>
                         <div className="flex gap-4">
                           <div className="flex flex-col gap-1 flex-1 min-w-0">
-                            <label className="text-[13px] font-medium text-[#737373]">Name</label>
+                            <label className="text-[14px] font-medium text-[#737373]">Name</label>
                             <input type="text" placeholder="e.g. Invoice processing"
-                                   className="h-9 border bg-white px-3 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
+                                   className="h-9 border bg-white px-3 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
                                    style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }} />
                           </div>
                           <div className="flex flex-col gap-1 flex-1 min-w-0">
-                            <label className="text-[13px] font-medium text-[#737373]">Template</label>
+                            <label className="text-[14px] font-medium text-[#737373]">Template</label>
                             <div className="relative">
                               <button ref={templateTriggerRef}
                                 onClick={openTemplate}
-                                className="w-full h-9 border bg-white px-3 text-[13px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                                className="w-full h-9 border bg-white px-3 text-[14px] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
                                 style={{ borderColor: templateOpen ? "#a3a3a3" : "#e5e5e5", boxShadow: templateOpen ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                                 <span className={`truncate ${templateSelected ? "text-[#0a0a0a]" : "text-[#a1a1aa]"}`}>
                                   {templateSelected || "Browse pre-built field sets"}
@@ -1091,7 +1091,7 @@ export default function RunPage() {
                         {[["Name", <Ic.Tag key="t" />], ["Type", <Ic.Braces key="b" />], ["Description", <Ic.TextIcon key="d" />]].map(([lbl, icon]) => (
                           <div key={lbl as string} className="flex items-center gap-1.5 px-3 py-1.5 border-b flex-1" style={{ borderColor: "#e5e5e5" }}>
                             <span className="text-[#737373]">{icon}</span>
-                            <span className="text-[13px] font-medium text-[#737373]">{lbl as string}</span>
+                            <span className="text-[14px] font-medium text-[#737373]">{lbl as string}</span>
                           </div>
                         ))}
                         <div className="shrink-0 border-b" style={{ width: 52, borderColor: "#e5e5e5" }} />
@@ -1100,8 +1100,8 @@ export default function RunPage() {
                       {/* Rows */}
                       {schemaRows.map(row => (
                         <div key={row.id}
-                             className="flex items-center border-b"
-                             style={{ minHeight: 52, borderColor: "#e5e5e5" }}
+                             className="flex items-center"
+                             style={{ minHeight: 52 }}
                              onBlur={(e) => {
                                /* Auto-commit when focus leaves the entire row */
                                if (!e.currentTarget.contains(e.relatedTarget as Node))
@@ -1119,7 +1119,7 @@ export default function RunPage() {
                                   onChange={e => updateRow(row.id, "name", e.target.value)}
                                   onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
                                   placeholder="Field name"
-                                  className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
+                                  className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
                                   style={{ borderColor: "#e5e5e5" }}
                                   onFocus={e => (e.currentTarget.style.borderColor = "#2563eb")}
                                   onBlur={e => (e.currentTarget.style.borderColor = "#e5e5e5")}
@@ -1134,7 +1134,7 @@ export default function RunPage() {
                                     const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
                                     setTypeDropState({ rowId: row.id, top: r.bottom + 2, left: r.left, width: r.width });
                                   }}
-                                  className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                                  className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
                                   style={{ borderColor: typeDropState?.rowId === row.id ? "#2563eb" : "#e5e5e5" }}>
                                   <span>{row.type}</span>
                                   <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
@@ -1148,7 +1148,7 @@ export default function RunPage() {
                                   onChange={e => updateRow(row.id, "desc", e.target.value)}
                                   onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
                                   placeholder="Description"
-                                  className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
+                                  className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
                                   style={{ borderColor: "#e5e5e5" }}
                                   onFocus={e => (e.currentTarget.style.borderColor = "#2563eb")}
                                   onBlur={e => (e.currentTarget.style.borderColor = "#e5e5e5")}
@@ -1161,20 +1161,20 @@ export default function RunPage() {
                               <div className="flex-1 px-2 py-1.5 cursor-text group/name" style={{ borderRight: "1px solid #e5e5e5" }}
                                    onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/name:border-[#e5e5e5] flex items-center px-2 transition-colors">
-                                  <span className="text-[13px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
+                                  <span className="text-[14px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
                                 </div>
                               </div>
                               <div className="flex-1 px-2 py-1.5 cursor-pointer group/type" style={{ borderRight: "1px solid #e5e5e5" }}
                                    onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/type:border-[#e5e5e5] flex items-center justify-between px-2 transition-colors">
-                                  <span className="text-[13px] text-[#0a0a0a] truncate">{row.type}</span>
+                                  <span className="text-[14px] text-[#0a0a0a] truncate">{row.type}</span>
                                   <span className="shrink-0 text-[#737373] opacity-0 group-hover/type:opacity-100 transition-opacity"><Ic.ChevronDown /></span>
                                 </div>
                               </div>
                               <div className="flex-1 px-2 py-1.5 cursor-text group/desc"
                                    onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/desc:border-[#e5e5e5] flex items-center px-2 transition-colors">
-                                  <span className="text-[13px] text-[#0a0a0a] truncate">{row.desc || <span className="text-[#a1a1aa]">—</span>}</span>
+                                  <span className="text-[14px] text-[#0a0a0a] truncate">{row.desc || <span className="text-[#a1a1aa]">—</span>}</span>
                                 </div>
                               </div>
                             </>
@@ -1191,7 +1191,7 @@ export default function RunPage() {
                       {/* Add schema row */}
                       <div className="flex items-center" style={{ height: 44 }}>
                         <button onClick={addSchemaRow}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors w-full">
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors w-full">
                           <Ic.Plus /> Add Schema
                         </button>
                       </div>
@@ -1200,7 +1200,7 @@ export default function RunPage() {
                 ) : (
                   /* ── Auto-Suggest tab ── */
                   <div className="flex flex-col gap-1">
-                    <label className="text-[13px] font-medium text-[#737373]">
+                    <label className="text-[14px] font-medium text-[#737373]">
                       Describe what fields to extract from your document
                     </label>
                     {/* Textarea container — 150px, flex-col, button sits in bottom addon bar */}
@@ -1210,7 +1210,7 @@ export default function RunPage() {
                       <div className="flex-1 min-h-0 relative p-3">
                         {autoSuggestLoading ? (
                           /* Shimmer text overlay when generating */
-                          <div className="text-[13px] leading-5 w-full h-full overflow-hidden"
+                          <div className="text-[14px] leading-5 w-full h-full overflow-hidden"
                                style={{
                                  background: "linear-gradient(90deg, #a3a3a3 25%, #e5e5e5 50%, #a3a3a3 75%)",
                                  backgroundSize: "200% auto",
@@ -1226,7 +1226,7 @@ export default function RunPage() {
                             value={autoSuggestText}
                             onChange={e => setAutoSuggestText(e.target.value)}
                             placeholder="e.g., invoice number, date, total amount, vendor name, line items with descriptions and prices..."
-                            className="w-full h-full border-0 outline-none resize-none text-[13px] text-[#0a0a0a] bg-transparent placeholder:text-[#a1a1aa] leading-5"
+                            className="w-full h-full border-0 outline-none resize-none text-[14px] text-[#0a0a0a] bg-transparent placeholder:text-[#a1a1aa] leading-5"
                           />
                         )}
                       </div>
@@ -1266,14 +1266,14 @@ export default function RunPage() {
               {activeTab === "result" && runState === "done" && (
                 <div className="flex-1 min-h-0 overflow-auto px-5 py-4">
                   {resultTab === "preview" && (
-                    <div style={{ fontFamily: "inherit", fontSize: 13, lineHeight: 1.7, color: "#374151" }}>
-                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>Image Description</h2>
+                    <div style={{ fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "#374151" }}>
+                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>Image Description</h2>
                       <p style={{ margin: "0 0 16px", color: "#4b5563" }}>
                         This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green
                         paper bag from Uber Eats placed on a concrete step in front of a dark door.
                       </p>
 
-                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Delivery Bag</h2>
+                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Delivery Bag</h2>
                       <p style={{ margin: "0 0 8px", color: "#4b5563" }}>A bright green paper bag with brown paper handles sits on the doorstep.</p>
                       <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
                         {[
@@ -1287,7 +1287,7 @@ export default function RunPage() {
                         ))}
                       </ul>
 
-                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Setting</h2>
+                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Setting</h2>
                       <p style={{ margin: "0 0 8px", color: "#4b5563" }}>The delivery is set in an outdoor entryway, surrounded by nature.</p>
                       <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
                         {[
@@ -1300,7 +1300,7 @@ export default function RunPage() {
                         ))}
                       </ul>
 
-                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Person</h2>
+                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Person</h2>
                       <p style={{ margin: "0 0 16px", color: "#4b5563" }}>
                         In the bottom-right foreground, the back of a person's head and shoulder are partially visible. They have
                         blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking
@@ -1334,13 +1334,13 @@ export default function RunPage() {
                   )}
 
                   {resultTab === "markdown" && (
-                    <div className="flex items-center justify-center py-20 text-[13px] text-[#a1a1aa]">
+                    <div className="flex items-center justify-center py-20 text-[14px] text-[#a1a1aa]">
                       Markdown view — coming in next update
                     </div>
                   )}
 
                   {resultTab === "json" && (
-                    <div className="flex items-center justify-center py-20 text-[13px] text-[#a1a1aa]">
+                    <div className="flex items-center justify-center py-20 text-[14px] text-[#a1a1aa]">
                       JSON view — coming in next update
                     </div>
                   )}
@@ -1353,13 +1353,13 @@ export default function RunPage() {
                      style={{ borderColor: "#e5e5e5" }}>
                   <div className="flex items-center gap-2">
                     <Link href="/"
-                          className="flex items-center gap-2 px-2.5 py-1.5 border bg-white text-[13px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-2 px-2.5 py-1.5 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors"
                           style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                       Cancel
                     </Link>
-                    <button className="flex items-center gap-2 px-2.5 py-1.5 bg-[#f5f5f5] text-[13px] font-medium text-[#171717] hover:bg-neutral-200 transition-colors">
+                    <button className="flex items-center gap-2 px-2.5 py-1.5 bg-[#f5f5f5] text-[14px] font-medium text-[#171717] hover:bg-neutral-200 transition-colors">
                       Save Changes
-                      <span className="flex items-center justify-center h-5 min-w-5 px-1 bg-neutral-200 text-[11px] font-medium text-[#737373]">⌘⏎</span>
+                      <span className="flex items-center justify-center h-5 min-w-5 px-1 bg-neutral-200 text-[12px] font-medium text-[#737373]">⌘⏎</span>
                     </button>
                   </div>
                 </div>
@@ -1384,7 +1384,7 @@ export default function RunPage() {
               <button key={t}
                       onClick={() => { updateRow(typeDropState.rowId, "type", t); setTypeDropState(null); }}
                       style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 12,
-                               paddingTop: 8, paddingBottom: 8, fontSize: 13, color: "#0a0a0a", textAlign: "left",
+                               paddingTop: 8, paddingBottom: 8, fontSize: 14, color: "#0a0a0a", textAlign: "left",
                                background: "none", border: "none", cursor: "pointer", position: "relative" }}
                       onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
                       onMouseLeave={e => (e.currentTarget.style.background = "none")}>
@@ -1409,7 +1409,7 @@ export default function RunPage() {
           {models.map(m => (
             <button key={m} onClick={() => { setModelSelected(m); setModelOpen(false); }}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 12,
-                             paddingTop: 8, paddingBottom: 8, fontSize: 13, color: "#0a0a0a", textAlign: "left",
+                             paddingTop: 8, paddingBottom: 8, fontSize: 14, color: "#0a0a0a", textAlign: "left",
                              background: "none", border: "none", cursor: "pointer", position: "relative" }}
                     onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
                     onMouseLeave={e => (e.currentTarget.style.background = "none")}>
@@ -1434,7 +1434,7 @@ export default function RunPage() {
           {templateOptions.map(t => (
             <button key={t} onClick={() => { setTemplateSelected(t); setTemplateOpen(false); }}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 12,
-                             paddingTop: 8, paddingBottom: 8, fontSize: 13, color: "#0a0a0a", textAlign: "left",
+                             paddingTop: 8, paddingBottom: 8, fontSize: 14, color: "#0a0a0a", textAlign: "left",
                              background: "none", border: "none", cursor: "pointer", position: "relative" }}
                     onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
                     onMouseLeave={e => (e.currentTarget.style.background = "none")}>

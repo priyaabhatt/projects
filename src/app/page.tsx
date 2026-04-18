@@ -67,7 +67,7 @@ const FigmaIcon = ({ src, size = 16 }: { src: string; size?: number }) => (
 const TooltipIcon = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="relative group flex items-center justify-center">
     {children}
-    <span className="pointer-events-none absolute left-full ml-2.5 top-1/2 -translate-y-1/2 z-50 px-2 py-1 bg-[#171717] text-[#fafafa] text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+    <span className="pointer-events-none absolute left-full ml-2.5 top-1/2 -translate-y-1/2 z-50 px-2 py-1 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
       {label}
     </span>
   </div>
@@ -81,7 +81,7 @@ const typeBadgeStyle: Record<DocType, string> = {
   Split:   "bg-indigo-50 text-indigo-600",
 };
 const DocTypeBadge = ({ type }: { type: DocType }) => (
-  <span className={`inline-flex items-center px-2 py-0.5 text-[13px] font-medium ${typeBadgeStyle[type]}`}>
+  <span className={`inline-flex items-center px-2 py-0.5 text-[14px] font-medium ${typeBadgeStyle[type]}`}>
     {type}
   </span>
 );
@@ -120,7 +120,7 @@ export default function PlaygroundPage() {
             <>
               <div className="flex items-center gap-2 min-w-0">
                 <img src="/assets/unsiloed-logo.png" width={17} height={17} alt="Unsiloed AI" style={{ flexShrink: 0 }} />
-                <span className="font-semibold text-[15px] text-[#171717] leading-none whitespace-nowrap">
+                <span className="font-semibold text-[16px] text-[#171717] leading-none whitespace-nowrap">
                   Unsiloed AI
                 </span>
               </div>
@@ -199,7 +199,7 @@ export default function PlaygroundPage() {
                       <FigmaIcon src="/assets/ic-lock.svg" />
                     </span>
                   </button>
-                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
+                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
                     Sign up to build and manage workflows
                   </span>
                 </div>
@@ -214,7 +214,7 @@ export default function PlaygroundPage() {
                       <FigmaIcon src="/assets/ic-lock.svg" />
                     </span>
                   </button>
-                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
+                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
                     Sign up to build and manage jobs
                   </span>
                 </div>
@@ -233,10 +233,10 @@ export default function PlaygroundPage() {
                       Upload any PDF and see real output in under 30 seconds.
                     </p>
                     <div className="flex gap-2">
-                      <button className="flex-1 py-1.5 text-[13px] font-medium text-white bg-[#171717] hover:bg-[#333] transition-colors">
+                      <button className="flex-1 py-1.5 text-[14px] font-medium text-white bg-[#171717] hover:bg-[#333] transition-colors">
                         Sign up
                       </button>
-                      <button className="flex-1 py-1.5 text-[13px] font-medium text-[#0a0a0a] border border-[#e5e5e5] bg-white hover:bg-neutral-50 transition-colors">
+                      <button className="flex-1 py-1.5 text-[14px] font-medium text-[#0a0a0a] border border-[#e5e5e5] bg-white hover:bg-neutral-50 transition-colors">
                         Book a demo
                       </button>
                     </div>
@@ -291,11 +291,11 @@ export default function PlaygroundPage() {
                    style={{ background: "#fff7ed", borderColor: "#e5e5e5" }}>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-orange-600 shrink-0"><IcTerminal /></span>
-                  <p className="text-[13px] font-medium text-orange-700 truncate">
+                  <p className="text-[14px] font-medium text-orange-700 truncate">
                     You&apos;re in Sandbox mode. Explore freely. Processing is limited to 10 pages per run.
                   </p>
                 </div>
-                <button className="shrink-0 px-2.5 py-1.5 text-[13px] font-medium border bg-white hover:bg-neutral-50 transition-colors"
+                <button className="shrink-0 px-2.5 py-1.5 text-[14px] font-medium border bg-white hover:bg-neutral-50 transition-colors"
                         style={{ borderColor: "#e5e5e5" }}>
                   Sign up free
                 </button>
@@ -324,7 +324,7 @@ export default function PlaygroundPage() {
                     <div className="flex items-start justify-between">
                       <img src={src} width={w} height={h} alt={title} style={{ display: "block" }} />
                       <button disabled
-                              className="flex items-center gap-1.5 px-1.5 py-1.5 border bg-white opacity-50 text-[13px] font-medium cursor-not-allowed"
+                              className="flex items-center gap-1.5 px-1.5 py-1.5 border bg-white opacity-50 text-[14px] font-medium cursor-not-allowed"
                               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                         <FigmaIcon src="/assets/ic-lock.svg" />
                         <span>Try it</span>
@@ -352,7 +352,7 @@ export default function PlaygroundPage() {
                     </span>
                     Try a template
                   </div>
-                  <span className="px-2 py-0.5 text-[13px] font-medium text-[#171717] bg-neutral-100">
+                  <span className="px-2 py-0.5 text-[14px] font-medium text-[#171717] bg-neutral-100">
                     For Demo
                   </span>
                 </div>
@@ -384,14 +384,14 @@ export default function PlaygroundPage() {
                     <div className="flex items-end justify-between shrink-0">
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 text-[13px] font-medium text-[#171717] bg-neutral-100">
+                          <span className="px-2 py-0.5 text-[14px] font-medium text-[#171717] bg-neutral-100">
                             {category}
                           </span>
                           <DocTypeBadge type={type} />
                         </div>
-                        <p className="text-[13px] font-medium text-neutral-800 whitespace-nowrap">{title}</p>
+                        <p className="text-[14px] font-medium text-neutral-800 whitespace-nowrap">{title}</p>
                       </div>
-                      <Link href="/run" className="flex items-center gap-1.5 px-3 py-1.5 border bg-white text-[13px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
+                      <Link href="/run" className="flex items-center gap-1.5 px-3 py-1.5 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
                               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                         Try
                         <IcChevronR />
