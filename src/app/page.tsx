@@ -189,25 +189,35 @@ export default function PlaygroundPage() {
                   Playground
                 </button>
                 {/* Workflows – locked */}
-                <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
-                  <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                    <FigmaIcon src="/assets/ic-gitpr.svg" />
+                <div className="relative group">
+                  <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <FigmaIcon src="/assets/ic-gitpr.svg" />
+                    </span>
+                    <span className="flex-1 text-[#0a0a0a]">Workflows</span>
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <FigmaIcon src="/assets/ic-lock.svg" />
+                    </span>
+                  </button>
+                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
+                    Sign up to build and manage workflows
                   </span>
-                  <span className="flex-1 text-[#0a0a0a]">Workflows</span>
-                  <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                    <FigmaIcon src="/assets/ic-lock.svg" />
-                  </span>
-                </button>
+                </div>
                 {/* Jobs – locked */}
-                <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
-                  <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                    <FigmaIcon src="/assets/ic-briefcase.svg" />
+                <div className="relative group">
+                  <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <FigmaIcon src="/assets/ic-briefcase.svg" />
+                    </span>
+                    <span className="flex-1 text-[#0a0a0a]">Jobs</span>
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <FigmaIcon src="/assets/ic-lock.svg" />
+                    </span>
+                  </button>
+                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
+                    Sign up to build and manage jobs
                   </span>
-                  <span className="flex-1 text-[#0a0a0a]">Jobs</span>
-                  <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                    <FigmaIcon src="/assets/ic-lock.svg" />
-                  </span>
-                </button>
+                </div>
               </div>
 
               {/* CTA card pinned to bottom */}
