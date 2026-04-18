@@ -136,6 +136,18 @@ const Ic = {
       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
     </svg>
   ),
+  WandSparkles: () => (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/>
+      <path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>
+    </svg>
+  ),
+  LoaderCircle: () => (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+         style={{ animation: "spin 1s linear infinite" }}>
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+    </svg>
+  ),
 };
 
 /* ─── Tooltip wrapper ────────────────────────────────────────────── */
@@ -579,6 +591,7 @@ export default function RunPage() {
   /* ── Schema sub-tab ── */
   const [schemaTab, setSchemaTab] = useState<"manual" | "auto">("manual");
   const [autoSuggestText, setAutoSuggestText] = useState("");
+  const [autoSuggestLoading, setAutoSuggestLoading] = useState(false);
 
   /* ─── Copy / Download handlers ─────────────────────────────────── */
   function handleCopy() {
@@ -1139,44 +1152,63 @@ export default function RunPage() {
                   </>
                 ) : (
                   /* ── Auto-Suggest tab ── */
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[13px] font-medium text-[#737373]">
-                        Describe what fields to extract from your document
-                      </label>
-                      <textarea
-                        value={autoSuggestText}
-                        onChange={e => setAutoSuggestText(e.target.value)}
-                        placeholder="e.g. Extract the invoice number, vendor name, line items with quantities and unit prices, subtotal, tax amount, and total amount due."
-                        className="w-full border bg-white px-3 py-2 text-[13px] text-[#0a0a0a] outline-none resize-none placeholder:text-[#a1a1aa] leading-5"
-                        style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)", height: 150 }}
-                      />
-                    </div>
-                    <button
-                      disabled={!autoSuggestText.trim()}
-                      className="flex items-center justify-center gap-2 h-9 px-4 text-[13px] font-medium transition-all self-start"
-                      style={autoSuggestText.trim() ? {
-                        background: "#171717", color: "#fafafa", cursor: "pointer",
-                      } : {
-                        background: "#171717", color: "#fafafa", opacity: 0.4, cursor: "not-allowed",
-                      }}>
-                      <Ic.Sparkles />
-                      Generate schema
-                    </button>
-                    {/* Placeholder for generated results */}
-                    {autoSuggestText.trim() === "" && (
-                      <div className="flex flex-col items-center justify-center gap-2 py-8 border border-dashed"
-                           style={{ borderColor: "#e5e5e5" }}>
-                        <span className="text-[#737373]">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-                          </svg>
-                        </span>
-                        <p className="text-[13px] text-[#737373] text-center max-w-[260px] leading-5">
-                          Describe your extraction goal above and we'll suggest a schema for you.
-                        </p>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[13px] font-medium text-[#737373]">
+                      Describe what fields to extract from your document
+                    </label>
+                    {/* Textarea container — 150px, flex-col, button sits in bottom addon bar */}
+                    <div className="border bg-white flex flex-col"
+                         style={{ height: 150, borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+                      {/* Text area — fills remaining height */}
+                      <div className="flex-1 min-h-0 relative p-3">
+                        {autoSuggestLoading ? (
+                          /* Shimmer text overlay when generating */
+                          <div className="text-[13px] leading-5 w-full h-full overflow-hidden"
+                               style={{
+                                 background: "linear-gradient(90deg, #a3a3a3 25%, #e5e5e5 50%, #a3a3a3 75%)",
+                                 backgroundSize: "200% auto",
+                                 WebkitBackgroundClip: "text",
+                                 WebkitTextFillColor: "transparent",
+                                 backgroundClip: "text",
+                                 animation: "shimmerText 1.5s linear infinite",
+                               }}>
+                            {autoSuggestText}
+                          </div>
+                        ) : (
+                          <textarea
+                            value={autoSuggestText}
+                            onChange={e => setAutoSuggestText(e.target.value)}
+                            placeholder="e.g., invoice number, date, total amount, vendor name, line items with descriptions and prices..."
+                            className="w-full h-full border-0 outline-none resize-none text-[13px] text-[#0a0a0a] bg-transparent placeholder:text-[#a1a1aa] leading-5"
+                          />
+                        )}
                       </div>
-                    )}
+                      {/* Bottom addon bar */}
+                      <div className="flex items-center justify-between shrink-0"
+                           style={{ padding: "6px 12px 6px 12px" }}>
+                        <div />
+                        <button
+                          disabled={!autoSuggestText.trim() || autoSuggestLoading}
+                          onClick={() => {
+                            if (!autoSuggestText.trim() || autoSuggestLoading) return;
+                            setAutoSuggestLoading(true);
+                            setTimeout(() => setAutoSuggestLoading(false), 3000);
+                          }}
+                          className="flex items-center gap-1.5 border bg-white text-[12px] font-medium text-[#0a0a0a] transition-colors"
+                          style={{
+                            padding: "6px 10px",
+                            borderColor: "#e5e5e5",
+                            opacity: !autoSuggestText.trim() ? 0.5 : 1,
+                            cursor: !autoSuggestText.trim() || autoSuggestLoading ? "not-allowed" : "pointer",
+                          }}>
+                          {autoSuggestLoading ? (
+                            <><Ic.LoaderCircle /> Generating schema...</>
+                          ) : (
+                            <><Ic.WandSparkles /> Generate schema</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
                   </div>
@@ -1345,6 +1377,8 @@ export default function RunPage() {
         @keyframes fadeIn         { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastSlideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastFadeOut   { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes spin           { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes shimmerText    { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
       `}</style>
     </div>
   );
