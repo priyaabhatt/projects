@@ -195,31 +195,13 @@ function CircularProgress({ percent }: { percent: number }) {
   );
 }
 
-/* ─── Code snippets shown during loading (cycle every 5 s) ──────── */
-const codeSnippets = [
-`// Initializing extraction pipeline...
-{
-  "document": "morgan-stanley-research.pdf",
-  "model": "Alpha (fast, accurate)",
-  "schema_fields": 7,
-  "status": "initializing"
-}`,
-`// Processing document structure...
-{
-  "pages_scanned": 12,
-  "fields_detected": 4,
-  "confidence": 0.94,
-  "citations_found": 2,
-  "status": "extracting"
-}`,
-`// Finalizing results...
-{
-  "fields_extracted": 7,
-  "citations": 3,
-  "validation": "passed",
-  "time_elapsed": "12.4s",
-  "status": "complete"
-}`,
+/* ─── Toast facts shown during loading (cycle every 3 s) ──────────── */
+const toastMessages = [
+  "Morgan Stanley research PDFs average 48 pages — Unsiloed processes them in under 15 seconds.",
+  "Structured extraction preserves citation context that plain copy-paste loses.",
+  "Alpha model achieves 94%+ field accuracy on dense financial tables.",
+  "Unsiloed detects nested headers and multi-column layouts automatically.",
+  "Each extracted field includes a confidence score and source page reference.",
 ];
 
 /* ─── Loading status messages that cycle ─────────────────────────── */
@@ -442,10 +424,10 @@ export default function RunPage() {
   const [progress, setProgress]         = useState(0);
   const [dotCount, setDotCount]         = useState(1);
   const [statusIdx, setStatusIdx]       = useState(0);
-  const [codeIdx, setCodeIdx]           = useState(0);
+  const [toastIdx, setToastIdx]         = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dotRef      = useRef<ReturnType<typeof setInterval> | null>(null);
-  const codeRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const toastRef    = useRef<ReturnType<typeof setInterval> | null>(null);
   const statusRef   = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* ── Resizable panel state ── */
@@ -490,7 +472,7 @@ export default function RunPage() {
     setProgress(0);
     setDotCount(1);
     setStatusIdx(0);
-    setCodeIdx(0);
+    setToastIdx(0);
 
     let p = 0;
     progressRef.current = setInterval(() => {
@@ -505,15 +487,15 @@ export default function RunPage() {
     }, 100);
 
     dotRef.current    = setInterval(() => setDotCount(d => d >= 3 ? 1 : d + 1), 500);
-    codeRef.current   = setInterval(() => setCodeIdx(i => (i + 1) % codeSnippets.length), 5000);
+    toastRef.current  = setInterval(() => setToastIdx(i => (i + 1) % toastMessages.length), 3000);
     statusRef.current = setInterval(() => setStatusIdx(i => (i + 1) % statusMessages.length), 2000);
   }
 
   useEffect(() => {
     if (runState !== "loading") {
-      [progressRef, dotRef, codeRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); });
+      [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); });
     }
-    return () => { [progressRef, dotRef, codeRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); }); };
+    return () => { [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); }); };
   }, [runState]);
 
   /* ─── Resizable drag ────────────────────────────────────────────── */
@@ -987,7 +969,7 @@ export default function RunPage() {
 
               {/* ── Loading state ── */}
               {runState === "loading" && (
-                <div className="flex flex-col items-center justify-center flex-1 gap-8 px-6 py-8">
+                <div className="flex flex-col items-center justify-center flex-1 gap-6 px-6 py-8">
                   {/* Progress circle + status */}
                   <div className="flex flex-col items-center gap-2">
                     <CircularProgress percent={progress} />
@@ -996,20 +978,16 @@ export default function RunPage() {
                     </span>
                   </div>
 
-                  {/* Code snippet block — cycles every 5 s */}
-                  <div className="w-full max-w-[340px] overflow-hidden"
-                       style={{ background: "#0f0f0f", boxShadow: "0 4px 16px rgba(0,0,0,0.18)" }}>
-                    {/* Fake window chrome */}
-                    <div className="flex items-center gap-1.5 px-3 py-2" style={{ borderBottom: "1px solid #1f1f1f" }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
-                    </div>
-                    <pre key={codeIdx}
-                         className="px-4 py-3 text-[12px] font-mono leading-5 overflow-x-auto"
-                         style={{ color: "#a3a3a3", animation: "fadeIn 0.5s ease", margin: 0, whiteSpace: "pre" }}>
-                      {codeSnippets[codeIdx]}
-                    </pre>
+                  {/* Fact toast card */}
+                  <div className="flex items-start gap-2 p-4 bg-white border"
+                       style={{ width: 356, borderColor: "#e5e5e5", boxShadow: "0px 4px 12px 0px rgba(0,0,0,0.1)" }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                    </svg>
+                    <p key={toastIdx} className="text-[14px] font-medium text-[#0a0a0a] leading-5 flex-1 min-w-0"
+                       style={{ animation: "fadeIn 0.4s ease" }}>
+                      {toastMessages[toastIdx]}
+                    </p>
                   </div>
                 </div>
               )}
