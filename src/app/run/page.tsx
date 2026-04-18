@@ -96,6 +96,21 @@ const Ic = {
       <circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/>
     </svg>
   ),
+  Copy: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+  ),
+  Download: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  ),
+  TimerClock: () => (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+  ),
 };
 
 /* ─── Tooltip wrapper ────────────────────────────────────────────── */
@@ -164,6 +179,183 @@ const statusMessages = [
 
 type SchemaRow = { id: number; name: string; type: string; desc: string; editing: boolean };
 
+/* ─── Preview result text (used for copy / download) ─────────────── */
+const PREVIEW_CONTENT = `## Image Description
+
+This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green paper bag from Uber Eats placed on a concrete step in front of a dark door.
+
+## The Delivery Bag
+
+A bright green paper bag with brown paper handles sits on the doorstep.
+
+- Branding: The bag is prominently branded with the Uber Eats logo in a dark, sans-serif font. The word "Uber" is stacked on top of the word "Eats".
+- Contents: The bag is open, and several items are visible inside:
+- A bouquet of fresh flowers, including red and yellow tulips.
+- A pink rectangular box.
+- A clear glass or bottle.
+
+## The Setting
+
+The delivery is set in an outdoor entryway, surrounded by nature.
+
+- Doorstep: The bag rests on a textured, light-colored concrete step.
+- Door and Walls: Behind the bag is a dark, solid-colored door or wall. To the left and right are concrete walls.
+- Foliage: The scene is framed with lush greenery. To the left, vines and small-leafed plants grow up the concrete wall.
+- Structure: On the far right, a wooden structure with vertical slats, possibly a fence or part of the house's exterior, is visible.
+
+## The Person
+
+In the bottom-right foreground, the back of a person's head and shoulder are partially visible. They have blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking down towards the delivery bag.
+`;
+
+/* ─── PDF page rendered as styled HTML ───────────────────────────── */
+function Hl({ on, children }: { on: boolean; children: React.ReactNode }) {
+  return on
+    ? <mark style={{ background: "rgba(253,224,71,0.45)", borderRadius: 2, padding: "0 1px" }}>{children}</mark>
+    : <>{children}</>;
+}
+
+function PdfPageContent({ page, highlight }: { page: number; highlight: boolean }) {
+  const bodyStyle: React.CSSProperties = {
+    fontFamily: "'Times New Roman', Times, serif",
+    fontSize: "10.5pt",
+    lineHeight: 1.68,
+    color: "#111",
+  };
+  const h1Style: React.CSSProperties = { fontWeight: "bold", fontSize: "11pt", letterSpacing: "0.06em", textAlign: "center", marginBottom: 22 };
+  const secHead: React.CSSProperties = { display: "flex", gap: 14, fontWeight: "bold", marginBottom: 6 };
+  const numCol: React.CSSProperties = { minWidth: 22, flexShrink: 0 };
+  const body: React.CSSProperties = { paddingLeft: 36, marginBottom: 8, textAlign: "justify" } as React.CSSProperties;
+  const ul: React.CSSProperties = { paddingLeft: 52, margin: "0 0 12px", display: "flex", flexDirection: "column", gap: 4 };
+  const footer: React.CSSProperties = { borderTop: "1px solid #ccc", marginTop: 32, paddingTop: 8, textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.06em" };
+
+  if (page !== 12) {
+    // Generic page for all other page numbers
+    return (
+      <div style={bodyStyle}>
+        <p style={h1Style}>SYSTEM DESIGN DOCUMENT</p>
+        {page === 1 ? (
+          <>
+            <p style={{ textAlign: "center", fontWeight: "bold", marginBottom: 18 }}>TABLE OF CONTENTS</p>
+            {[
+              "1  Introduction ......................................................................................  3",
+              "   1.1  Purpose ....................................................................................  3",
+              "   1.2  Scope ......................................................................................  4",
+              "   1.3  Definitions, Acronyms, and Abbreviations .........................................  4",
+              "2  System Overview ............................................................................  6",
+              "   2.1  System Context .........................................................................  6",
+              "   2.2  Major System Components ..........................................................  8",
+              "3  File and Database Design ...............................................................  12",
+              "   3.1  Database Management System Files ...........................................  12",
+              "   3.2  Non-Database Management System Files ....................................  13",
+              "4  Human-Machine Interface ................................................................  15",
+              "5  Requirements Traceability Matrix ....................................................  18",
+            ].map((line, i) => (
+              <p key={i} style={{ marginBottom: 2, fontFamily: "monospace", fontSize: "9.5pt", whiteSpace: "pre" }}>{line}</p>
+            ))}
+          </>
+        ) : (
+          <>
+            <div style={{ ...secHead, marginBottom: 10 }}>
+              <span style={numCol}>{page < 6 ? "1" : page < 10 ? "2" : "5"}</span>
+              <span>{page < 6 ? "INTRODUCTION" : page < 10 ? "SYSTEM OVERVIEW" : "REQUIREMENTS TRACEABILITY"}</span>
+            </div>
+            <p style={body}>
+              This section provides detailed information as required for understanding the system architecture
+              and design decisions for the project under development. Additional documentation may be provided
+              as appendices where applicable.
+            </p>
+            <p style={{ borderTop: "1px solid #ccc", marginTop: 32, paddingTop: 8, textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.06em" }}>
+              SYSTEM DESIGN DOCUMENT · Page {page}
+            </p>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={bodyStyle}>
+      <p style={h1Style}>SYSTEM DESIGN DOCUMENT</p>
+
+      {/* § 3 */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={secHead}><span style={numCol}>3</span><span>FILE AND DATABASE DESIGN</span></div>
+        <p style={body}>
+          Interact with the Database Administrator (DBA) when preparing this section. The section
+          should reveal the final design of all database management system (DBMS) files and the
+          non-DBMS files associated with the system under development. Additional information may
+          add as required for the particular project. Provide a comprehensive data dictionary showing
+          data element name, type, length, source, validation rules, maintenance (create, read, update,
+          delete (CRUD) capability), data stores, aliases, and description. Can be included as an appendix.
+        </p>
+      </div>
+
+      {/* § 3.1 */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={secHead}><span style={numCol}>3.1</span><span>Database Management System Files</span></div>
+        <p style={body}>
+          This section reveals the final design of the DBMS files and includes the following
+          information, as appropriate (refer to the data dictionary):
+        </p>
+        <ul style={ul}>
+          <li style={{ textAlign: "justify" }}>
+            <Hl on={highlight}>Refined logical model: provide normalized table layouts, entity relationship
+            diagrams, and other logical design information</Hl>
+          </li>
+          <li style={{ textAlign: "justify" }}>
+            A physical description of the DBMS schemas, sub-schemas, records, sets, tables, storage page sizes, etc.
+          </li>
+          <li style={{ textAlign: "justify" }}>
+            Access methods (such as indexed, via set, sequential, random access, sorted pointer array, etc.)
+          </li>
+          <li style={{ textAlign: "justify" }}>
+            <Hl on={highlight}>Estimate of the DBMS file size or volume of data within the file, and data pages,
+            including overhead resulting from access methods and free space</Hl>
+          </li>
+          <li style={{ textAlign: "justify" }}>
+            Definition of the update frequency of the database tables, views, files, areas, records, sets, and data
+            pages; estimate the number of transactions if the database is an online transaction-based system
+          </li>
+        </ul>
+      </div>
+
+      {/* § 3.2 */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={secHead}><span style={numCol}>3.2</span><span>Non-Database Management System Files</span></div>
+        <p style={body}>
+          In this section, provide the detailed description of all non-DBMS files and include a narrative
+          description of the usage of each file—including if the file is used for input, output, or both;
+          if this file is a temporary file; an indication of which modules read and write the file, etc.;
+          and file structures (refer to the data dictionary). As appropriate, the file structure information should:
+        </p>
+        <ul style={ul}>
+          <li style={{ textAlign: "justify" }}>Identify record structures, record keys or indexes, and reference data elements within the records</li>
+          <li style={{ textAlign: "justify" }}>Define record length (fixed or variable length) and blocking factors</li>
+          <li style={{ textAlign: "justify" }}>Define file access method—for example, indexed sequential, virtual sequential, random access, etc.</li>
+          <li style={{ textAlign: "justify" }}>
+            <Hl on={highlight}>Estimate the file size or volume of data within the file, including overhead resulting
+            from access methods and free space</Hl>
+          </li>
+          <li style={{ textAlign: "justify" }}>
+            Define the update frequency of the file; if the file is part of an online transaction-based system,
+            provide the estimated number of transactions per unit time, and the statistical mean, mode, and
+            distribution of those transactions
+          </li>
+        </ul>
+      </div>
+
+      {/* § 4 */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={secHead}><span style={numCol}>4</span><span>HUMAN-MACHINE INTERFACE</span></div>
+        <p style={body}>This section provides the detailed design of the system and subsystem inputs and outputs</p>
+      </div>
+
+      <p style={footer}>SYSTEM DESIGN DOCUMENT</p>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function RunPage() {
   /* ── top-level state ── */
@@ -173,6 +365,11 @@ export default function RunPage() {
   const [modelSelected, setModelSelected] = useState("");
   const [citationsOn, setCitationsOn] = useState(false);
   const [runState, setRunState]       = useState<"idle" | "loading" | "done">("idle");
+
+  /* ── Result panel sub-state ── */
+  const [resultTab, setResultTab]     = useState<"preview" | "markdown" | "json">("preview");
+  const [dlToastState, setDlToastState] = useState<"hidden" | "in" | "out">("hidden");
+  const dlToastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── PDF viewer state ── */
   const totalPages = 24;
@@ -289,11 +486,48 @@ export default function RunPage() {
   const typeOptions = ["String", "Number", "Boolean", "Array", "Object"];
   const models = ["GPT-4o (Standard)", "Claude 3.5 Sonnet", "Gemini 1.5 Pro", "GPT-4o Mini"];
 
+  /* ─── Copy / Download handlers ─────────────────────────────────── */
+  function handleCopy() {
+    navigator.clipboard.writeText(PREVIEW_CONTENT).catch(() => {});
+  }
+
+  function handleDownload() {
+    if (dlToastRef.current) clearTimeout(dlToastRef.current);
+    setDlToastState("in");
+    dlToastRef.current = setTimeout(() => {
+      setDlToastState("out");
+      setTimeout(() => setDlToastState("hidden"), 380);
+    }, 4200);
+    const blob = new Blob([PREVIEW_CONTENT], { type: "text/markdown" });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement("a"), { href: url, download: "morgan-stanley-result.md" });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   /* ═══════════════════════════════════════════════════════════════════
      RENDER
   ═══════════════════════════════════════════════════════════════════ */
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#fafafa]">
+
+      {/* ══════ DOWNLOAD TOAST ═══════════════════════════════════════ */}
+      {dlToastState !== "hidden" && (
+        <div
+          className="fixed top-4 right-5 z-50 flex items-center gap-2 bg-white border border-[#e5e5e5] px-4 py-2 text-[13px] font-medium text-[#0a0a0a]"
+          style={{
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+            animation: dlToastState === "in"
+              ? "toastSlideDown 0.2s ease-out forwards"
+              : "toastFadeOut 0.38s ease-out forwards",
+          }}
+        >
+          <Ic.TimerClock />
+          Result downloaded
+        </div>
+      )}
 
       {/* ══════ TOP BAR ══════════════════════════════════════════════ */}
       <div className="flex items-center gap-3 px-4 border-b shrink-0"
@@ -410,11 +644,14 @@ export default function RunPage() {
                     paddingLeft: 16,
                     paddingRight: 16,
                   }}>
-                    <img src="/assets/pdf-page.png" alt={`Page ${currentPage}`}
-                         className="w-full shadow-sm" style={{ display: "block", maxWidth: 520 }} />
+                    {/* Designed PDF page — no imported image */}
+                    <div className="w-full bg-white shadow-sm" style={{ maxWidth: 520, padding: "52px 60px", minHeight: 680 }}>
+                      <PdfPageContent page={currentPage} highlight={citationsOn && runState === "done"} />
+                    </div>
                     {currentPage < totalPages && (
-                      <img src="/assets/pdf-page.png" alt={`Page ${currentPage + 1}`}
-                           className="w-full shadow-sm" style={{ display: "block", maxWidth: 520 }} />
+                      <div className="w-full bg-white shadow-sm" style={{ maxWidth: 520, padding: "52px 60px", minHeight: 680 }}>
+                        <PdfPageContent page={currentPage + 1} highlight={citationsOn && runState === "done"} />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -545,6 +782,69 @@ export default function RunPage() {
                 </Tooltip>
               </div>
             </div>
+
+            {/* ── Result sub-header: Preview/Markdown/JSON + controls ── */}
+            {activeTab === "result" && runState === "done" && (
+              <div className="flex items-center justify-between px-4 border-b shrink-0 bg-white"
+                   style={{ borderColor: "#e5e5e5", height: 42 }}>
+                {/* Sub-tabs */}
+                <div className="flex items-center gap-5 h-full">
+                  {(["preview", "markdown", "json"] as const).map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setResultTab(tab)}
+                      className="h-full text-[13px] font-medium capitalize transition-colors border-b-2"
+                      style={{
+                        borderColor: resultTab === tab ? "#171717" : "transparent",
+                        color: resultTab === tab ? "#171717" : "#737373",
+                      }}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Right controls */}
+                <div className="flex items-center gap-1">
+                  {/* Source highlighting toggle */}
+                  <div className="flex items-center gap-2 mr-1">
+                    <span className="text-[12px] text-[#737373] whitespace-nowrap">Source highlighting</span>
+                    <button
+                      onClick={() => setCitationsOn(v => !v)}
+                      className="flex items-center px-0.5 shrink-0 transition-colors"
+                      style={{ width: 36, height: 20, background: citationsOn ? "#171717" : "#e5e5e5", transition: "background 0.2s" }}
+                    >
+                      <div className="bg-white shrink-0" style={{
+                        width: 16, height: 16,
+                        transform: citationsOn ? "translateX(16px)" : "translateX(0)",
+                        transition: "transform 0.2s",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                      }} />
+                    </button>
+                  </div>
+
+                  {/* Copy */}
+                  <Tooltip label="Copy" placement="bottom">
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center justify-center w-8 h-8 text-[#737373] hover:text-[#171717] hover:bg-neutral-100 transition-colors"
+                    >
+                      <Ic.Copy />
+                    </button>
+                  </Tooltip>
+
+                  {/* Download */}
+                  <Tooltip label="Download" placement="bottom">
+                    <button
+                      onClick={handleDownload}
+                      className="flex items-center justify-center w-8 h-8 text-[#737373] hover:text-[#171717] hover:bg-neutral-100 transition-colors"
+                    >
+                      <Ic.Download />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+            )}
 
             {/* Panel body */}
             <div className="flex-1 min-h-0 overflow-auto flex flex-col justify-between">
@@ -738,13 +1038,86 @@ export default function RunPage() {
 
               {/* ── Result tab ── */}
               {activeTab === "result" && runState === "done" && (
-                <div className="flex flex-col flex-1 p-4 gap-3">
-                  <div className="border p-4 bg-white" style={{ borderColor: "#e5e5e5" }}>
-                    <p className="text-[14px] font-medium text-[#0a0a0a] mb-2">Extraction complete</p>
-                    <p className="text-[13px] text-[#737373] leading-5">
-                      Structured output is ready. This panel would show the parsed fields, citations, and schema-mapped values in the production build.
-                    </p>
-                  </div>
+                <div className="flex-1 min-h-0 overflow-auto px-5 py-4">
+                  {resultTab === "preview" && (
+                    <div style={{ fontFamily: "inherit", fontSize: 13, lineHeight: 1.7, color: "#374151" }}>
+                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>Image Description</h2>
+                      <p style={{ margin: "0 0 16px", color: "#4b5563" }}>
+                        This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green
+                        paper bag from Uber Eats placed on a concrete step in front of a dark door.
+                      </p>
+
+                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Delivery Bag</h2>
+                      <p style={{ margin: "0 0 8px", color: "#4b5563" }}>A bright green paper bag with brown paper handles sits on the doorstep.</p>
+                      <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+                        {[
+                          'Branding: The bag is prominently branded with the Uber Eats logo in a dark, sans-serif font. The word "Uber" is stacked on top of the word "Eats".',
+                          "Contents: The bag is open, and several items are visible inside:",
+                          "A bouquet of fresh flowers, including red and yellow tulips.",
+                          "A pink rectangular box.",
+                          "A clear glass or bottle.",
+                        ].map((item, i) => (
+                          <li key={i} style={{ color: "#4b5563", fontSize: 13 }}>{item}</li>
+                        ))}
+                      </ul>
+
+                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Setting</h2>
+                      <p style={{ margin: "0 0 8px", color: "#4b5563" }}>The delivery is set in an outdoor entryway, surrounded by nature.</p>
+                      <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+                        {[
+                          "Doorstep: The bag rests on a textured, light-colored concrete step.",
+                          "Door and Walls: Behind the bag is a dark, solid-colored door or wall. To the left and right are concrete walls.",
+                          "Foliage: The scene is framed with lush greenery. To the left, vines and small-leafed plants grow up the concrete wall. To the right of the door, there are more plants with long, thin, light-green leaves.",
+                          "Structure: On the far right, a wooden structure with vertical slats, possibly a fence or part of the house's exterior, is visible.",
+                        ].map((item, i) => (
+                          <li key={i} style={{ color: "#4b5563", fontSize: 13 }}>{item}</li>
+                        ))}
+                      </ul>
+
+                      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Person</h2>
+                      <p style={{ margin: "0 0 16px", color: "#4b5563" }}>
+                        In the bottom-right foreground, the back of a person's head and shoulder are partially visible. They have
+                        blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking
+                        down towards the delivery bag.
+                      </p>
+
+                      {/* Styled image area — no imported image, designed representation */}
+                      <div style={{
+                        borderRadius: 4, overflow: "hidden", height: 168,
+                        background: "linear-gradient(145deg, #1c2b3a 0%, #0d1a24 55%, #1a2e1a 100%)",
+                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                        position: "relative",
+                      }}>
+                        {/* Greenery blobs */}
+                        <div style={{ position: "absolute", bottom: 0, left: 0, width: 100, height: 130,
+                          background: "radial-gradient(ellipse at 20% 85%, rgba(34,197,94,0.22) 0%, transparent 70%)" }} />
+                        <div style={{ position: "absolute", bottom: 0, right: 20, width: 80, height: 110,
+                          background: "radial-gradient(ellipse at 75% 90%, rgba(21,128,61,0.28) 0%, transparent 70%)" }} />
+                        {/* Bag silhouette */}
+                        <div style={{ width: 48, height: 60, background: "rgba(34,197,94,0.68)", borderRadius: "4px 4px 5px 5px", position: "relative", marginBottom: 6 }}>
+                          <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+                            width: 28, height: 12, borderTop: "4px solid rgba(110,70,30,0.8)",
+                            borderLeft: "4px solid rgba(110,70,30,0.8)", borderRight: "4px solid rgba(110,70,30,0.8)",
+                            borderRadius: "8px 8px 0 0" }} />
+                        </div>
+                        <div style={{ color: "rgba(255,255,255,0.32)", fontSize: 10, letterSpacing: "0.04em" }}>
+                          morgan-stanley-research.pdf · page {currentPage}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {resultTab === "markdown" && (
+                    <div className="flex items-center justify-center py-20 text-[13px] text-[#a1a1aa]">
+                      Markdown view — coming in next update
+                    </div>
+                  )}
+
+                  {resultTab === "json" && (
+                    <div className="flex items-center justify-center py-20 text-[13px] text-[#a1a1aa]">
+                      JSON view — coming in next update
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -772,7 +1145,9 @@ export default function RunPage() {
       </div>
 
       <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn         { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastSlideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastFadeOut   { from { opacity: 1; } to { opacity: 0; } }
       `}</style>
     </div>
   );
