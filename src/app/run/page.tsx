@@ -96,7 +96,9 @@ const Ic = {
   ),
   Trash: () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
     </svg>
   ),
   TableProp: () => (
@@ -564,6 +566,11 @@ export default function RunPage() {
   const [modelPos,    setModelPos]    = useState({ top: 0, left: 0, width: 0 });
   const [templatePos, setTemplatePos] = useState({ top: 0, left: 0, width: 0 });
 
+  /* ── Type column dropdown (one per schema row, portal-based) ── */
+  const [typeDropState, setTypeDropState] = useState<{ rowId: number; top: number; left: number; width: number } | null>(null);
+  const typeMenuRef      = useRef<HTMLDivElement>(null);
+  const typeTriggerRefs  = useRef<Map<number, HTMLButtonElement>>(new Map());
+
   function openModel() {
     const r = modelTriggerRef.current?.getBoundingClientRect();
     if (r) setModelPos({ top: r.bottom + 2, left: r.left, width: r.width });
@@ -583,10 +590,15 @@ export default function RunPage() {
         setModelOpen(false);
       if (templateOpen && !templateTriggerRef.current?.contains(t) && !templateMenuRef.current?.contains(t))
         setTemplateOpen(false);
+      if (typeDropState) {
+        const trigger = typeTriggerRefs.current.get(typeDropState.rowId);
+        if (!typeMenuRef.current?.contains(t) && !trigger?.contains(t))
+          setTypeDropState(null);
+      }
     }
     document.addEventListener("mousedown", onMouseDown);
     return () => document.removeEventListener("mousedown", onMouseDown);
-  }, [modelOpen, templateOpen]);
+  }, [modelOpen, templateOpen, typeDropState]);
 
   /* ── Schema sub-tab ── */
   const [schemaTab, setSchemaTab] = useState<"manual" | "auto">("manual");
@@ -1087,54 +1099,89 @@ export default function RunPage() {
 
                       {/* Rows */}
                       {schemaRows.map(row => (
-                        <div key={row.id} className="flex items-center border-b" style={{ minHeight: 52, borderColor: "#e5e5e5" }}>
+                        <div key={row.id}
+                             className="flex items-center border-b"
+                             style={{ minHeight: 52, borderColor: "#e5e5e5" }}
+                             onBlur={(e) => {
+                               /* Auto-commit when focus leaves the entire row */
+                               if (!e.currentTarget.contains(e.relatedTarget as Node))
+                                 commitRow(row.id);
+                             }}>
                           {row.editing ? (
-                            /* Editable row */
+                            /* ── Editing row ── */
                             <>
-                              <div className="flex-1 px-2 py-1.5">
-                                <input autoFocus type="text" value={row.name}
-                                       onChange={e => updateRow(row.id, "name", e.target.value)}
-                                       onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
-                                       placeholder="Field name"
-                                       className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
-                                       style={{ borderColor: "#2563eb" }} />
+                              {/* Name */}
+                              <div className="flex-1 px-2 py-1.5" style={{ borderRight: "1px solid #e5e5e5" }}>
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  value={row.name}
+                                  onChange={e => updateRow(row.id, "name", e.target.value)}
+                                  onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
+                                  placeholder="Field name"
+                                  className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
+                                  style={{ borderColor: "#e5e5e5" }}
+                                  onFocus={e => (e.currentTarget.style.borderColor = "#2563eb")}
+                                  onBlur={e => (e.currentTarget.style.borderColor = "#e5e5e5")}
+                                />
                               </div>
-                              <div className="flex-1 px-2 py-1.5">
-                                <div className="relative">
-                                  <select value={row.type} onChange={e => updateRow(row.id, "type", e.target.value)}
-                                          className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] appearance-none outline-none cursor-pointer"
-                                          style={{ borderColor: "#e5e5e5" }}>
-                                    {typeOptions.map(t => <option key={t} value={t}>{t}</option>)}
-                                  </select>
-                                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[#737373]"><Ic.ChevronDown /></div>
-                                </div>
+                              {/* Type — portal dropdown */}
+                              <div className="flex-1 px-2 py-1.5" style={{ borderRight: "1px solid #e5e5e5" }}>
+                                <button
+                                  ref={el => { if (el) typeTriggerRefs.current.set(row.id, el); else typeTriggerRefs.current.delete(row.id); }}
+                                  onClick={e => {
+                                    if (typeDropState?.rowId === row.id) { setTypeDropState(null); return; }
+                                    const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                                    setTypeDropState({ rowId: row.id, top: r.bottom + 2, left: r.left, width: r.width });
+                                  }}
+                                  className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
+                                  style={{ borderColor: typeDropState?.rowId === row.id ? "#2563eb" : "#e5e5e5" }}>
+                                  <span>{row.type}</span>
+                                  <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
+                                </button>
                               </div>
+                              {/* Description */}
                               <div className="flex-1 px-2 py-1.5">
-                                <input type="text" value={row.desc}
-                                       onChange={e => updateRow(row.id, "desc", e.target.value)}
-                                       onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
-                                       placeholder="Description"
-                                       className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
-                                       style={{ borderColor: "#e5e5e5" }} />
+                                <input
+                                  type="text"
+                                  value={row.desc}
+                                  onChange={e => updateRow(row.id, "desc", e.target.value)}
+                                  onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
+                                  placeholder="Description"
+                                  className="w-full h-8 border bg-white px-2 text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
+                                  style={{ borderColor: "#e5e5e5" }}
+                                  onFocus={e => (e.currentTarget.style.borderColor = "#2563eb")}
+                                  onBlur={e => (e.currentTarget.style.borderColor = "#e5e5e5")}
+                                />
                               </div>
                             </>
                           ) : (
-                            /* Display row */
+                            /* ── Display row — hover reveals borders, click to re-edit ── */
                             <>
-                              <div className="flex-1 flex items-center px-3 py-2 min-w-0">
-                                <span className="text-[13px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
+                              <div className="flex-1 px-2 py-1.5 cursor-text group/name" style={{ borderRight: "1px solid #e5e5e5" }}
+                                   onClick={() => updateRow(row.id, "editing", true)}>
+                                <div className="w-full h-8 border border-transparent group-hover/name:border-[#e5e5e5] flex items-center px-2 transition-colors">
+                                  <span className="text-[13px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
+                                </div>
                               </div>
-                              <div className="flex-1 flex items-center px-3 py-2 min-w-0">
-                                <span className="text-[13px] font-medium text-[#0a0a0a] truncate">{row.type}</span>
+                              <div className="flex-1 px-2 py-1.5 cursor-pointer group/type" style={{ borderRight: "1px solid #e5e5e5" }}
+                                   onClick={() => updateRow(row.id, "editing", true)}>
+                                <div className="w-full h-8 border border-transparent group-hover/type:border-[#e5e5e5] flex items-center justify-between px-2 transition-colors">
+                                  <span className="text-[13px] text-[#0a0a0a] truncate">{row.type}</span>
+                                  <span className="shrink-0 text-[#737373] opacity-0 group-hover/type:opacity-100 transition-opacity"><Ic.ChevronDown /></span>
+                                </div>
                               </div>
-                              <div className="flex-1 flex items-center px-3 py-2 min-w-0">
-                                <span className="text-[13px] text-[#0a0a0a] truncate">{row.desc}</span>
+                              <div className="flex-1 px-2 py-1.5 cursor-text group/desc"
+                                   onClick={() => updateRow(row.id, "editing", true)}>
+                                <div className="w-full h-8 border border-transparent group-hover/desc:border-[#e5e5e5] flex items-center px-2 transition-colors">
+                                  <span className="text-[13px] text-[#0a0a0a] truncate">{row.desc || <span className="text-[#a1a1aa]">—</span>}</span>
+                                </div>
                               </div>
                             </>
                           )}
                           <div className="shrink-0 flex items-center justify-center px-2" style={{ width: 52 }}>
                             <button onClick={() => deleteRow(row.id)}
-                                    className="flex items-center justify-center w-8 h-8 hover:bg-red-50 transition-colors text-[#737373] hover:text-red-500">
+                                    className="flex items-center justify-center w-8 h-8 hover:bg-red-50 transition-colors text-[#a3a3a3] hover:text-red-500">
                               <Ic.Trash />
                             </button>
                           </div>
@@ -1324,6 +1371,36 @@ export default function RunPage() {
       </div>
 
       {/* ── Dropdown portals — rendered at document.body, escape all overflow containers ── */}
+
+      {/* Type column dropdown */}
+      {mounted && typeDropState && createPortal(
+        <div ref={typeMenuRef}
+             style={{ position: "fixed", zIndex: 9999, top: typeDropState.top, left: typeDropState.left, width: typeDropState.width,
+                      background: "white", border: "1px solid #e5e5e5", padding: "4px 0",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)" }}>
+          {typeOptions.map(t => {
+            const selected = schemaRows.find(r => r.id === typeDropState.rowId)?.type === t;
+            return (
+              <button key={t}
+                      onClick={() => { updateRow(typeDropState.rowId, "type", t); setTypeDropState(null); }}
+                      style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, paddingLeft: 32, paddingRight: 12,
+                               paddingTop: 8, paddingBottom: 8, fontSize: 13, color: "#0a0a0a", textAlign: "left",
+                               background: "none", border: "none", cursor: "pointer", position: "relative" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+                {selected && (
+                  <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                )}
+                {t}
+              </button>
+            );
+          })}
+        </div>,
+        document.body
+      )}
+
       {mounted && modelOpen && createPortal(
         <div ref={modelMenuRef}
              style={{ position: "fixed", zIndex: 9999, top: modelPos.top, left: modelPos.left, width: modelPos.width,
