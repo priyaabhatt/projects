@@ -468,27 +468,8 @@ export default function RunPage() {
   /* ─── Loading animation ─────────────────────────────────────────── */
   function startLoading() {
     if (!canRun) return;
-    setRunState("loading");
-    setProgress(0);
-    setDotCount(1);
-    setStatusIdx(0);
-    setToastIdx(0);
-
-    let p = 0;
-    progressRef.current = setInterval(() => {
-      /* 15 s total: fast start (0-20%), slow middle (20-85%), fast end (85-100%) */
-      const increment = p < 20 ? 1.0 : p < 85 ? 0.65 : 0.6;
-      p = Math.min(100, p + increment);
-      setProgress(p);
-      if (p >= 100) {
-        clearInterval(progressRef.current!);
-        setTimeout(() => { setRunState("done"); setActiveTab("result"); }, 400);
-      }
-    }, 100);
-
-    dotRef.current    = setInterval(() => setDotCount(d => d >= 3 ? 1 : d + 1), 500);
-    toastRef.current  = setInterval(() => setToastIdx(i => (i + 1) % toastMessages.length), 3000);
-    statusRef.current = setInterval(() => setStatusIdx(i => (i + 1) % statusMessages.length), 2000);
+    setRunState("done");
+    setActiveTab("result");
   }
 
   useEffect(() => {
@@ -981,8 +962,10 @@ export default function RunPage() {
                   {/* Fact toast card */}
                   <div className="flex items-start gap-2 p-4 bg-white border"
                        style={{ width: 356, borderColor: "#e5e5e5", boxShadow: "0px 4px 12px 0px rgba(0,0,0,0.1)" }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+                      <circle cx="12" cy="12" r="10" fill="#0a0a0a"/>
+                      <path d="M12 16v-4" stroke="white" strokeWidth="1.5"/>
+                      <path d="M12 8h.01" stroke="white" strokeWidth="2"/>
                     </svg>
                     <p key={toastIdx} className="text-[14px] font-medium text-[#0a0a0a] leading-5 flex-1 min-w-0"
                        style={{ animation: "fadeIn 0.4s ease" }}>
