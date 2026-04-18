@@ -195,14 +195,31 @@ function CircularProgress({ percent }: { percent: number }) {
   );
 }
 
-/* ─── Toast / fun fact messages ──────────────────────────────────── */
-const toastMessages = [
-  "The smallest valid PDF file is only 67 bytes, but most are thousands of times larger.",
-  "PDF stands for Portable Document Format, created by Adobe in 1993.",
-  "The PDF/A standard ensures documents look the same 100 years from now.",
-  "Over 2.5 trillion PDF pages are produced each year worldwide.",
-  "A single PDF can embed 3D models, videos, and interactive forms.",
-  "PDF became an ISO open standard (ISO 32000) in 2008.",
+/* ─── Code snippets shown during loading (cycle every 5 s) ──────── */
+const codeSnippets = [
+`// Initializing extraction pipeline...
+{
+  "document": "morgan-stanley-research.pdf",
+  "model": "Alpha (fast, accurate)",
+  "schema_fields": 7,
+  "status": "initializing"
+}`,
+`// Processing document structure...
+{
+  "pages_scanned": 12,
+  "fields_detected": 4,
+  "confidence": 0.94,
+  "citations_found": 2,
+  "status": "extracting"
+}`,
+`// Finalizing results...
+{
+  "fields_extracted": 7,
+  "citations": 3,
+  "validation": "passed",
+  "time_elapsed": "12.4s",
+  "status": "complete"
+}`,
 ];
 
 /* ─── Loading status messages that cycle ─────────────────────────── */
@@ -424,11 +441,11 @@ export default function RunPage() {
   /* ── Loading animation state ── */
   const [progress, setProgress]         = useState(0);
   const [dotCount, setDotCount]         = useState(1);
-  const [toastIdx, setToastIdx]         = useState(0);
   const [statusIdx, setStatusIdx]       = useState(0);
+  const [codeIdx, setCodeIdx]           = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dotRef      = useRef<ReturnType<typeof setInterval> | null>(null);
-  const toastRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const codeRef     = useRef<ReturnType<typeof setInterval> | null>(null);
   const statusRef   = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* ── Resizable panel state ── */
@@ -472,13 +489,13 @@ export default function RunPage() {
     setRunState("loading");
     setProgress(0);
     setDotCount(1);
-    setToastIdx(0);
     setStatusIdx(0);
+    setCodeIdx(0);
 
     let p = 0;
     progressRef.current = setInterval(() => {
-      // slow ramp: fast start, slow middle, fast end
-      const increment = p < 20 ? 1.5 : p < 70 ? 0.6 : 1.2;
+      /* 15 s total: fast start (0-20%), slow middle (20-85%), fast end (85-100%) */
+      const increment = p < 20 ? 1.0 : p < 85 ? 0.65 : 0.6;
       p = Math.min(100, p + increment);
       setProgress(p);
       if (p >= 100) {
@@ -487,16 +504,16 @@ export default function RunPage() {
       }
     }, 100);
 
-    dotRef.current   = setInterval(() => setDotCount(d => d >= 3 ? 1 : d + 1), 500);
-    toastRef.current = setInterval(() => setToastIdx(i => (i + 1) % toastMessages.length), 3000);
-    statusRef.current = setInterval(() => setStatusIdx(i => (i + 1) % statusMessages.length), 1800);
+    dotRef.current    = setInterval(() => setDotCount(d => d >= 3 ? 1 : d + 1), 500);
+    codeRef.current   = setInterval(() => setCodeIdx(i => (i + 1) % codeSnippets.length), 5000);
+    statusRef.current = setInterval(() => setStatusIdx(i => (i + 1) % statusMessages.length), 2000);
   }
 
   useEffect(() => {
     if (runState !== "loading") {
-      [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); });
+      [progressRef, dotRef, codeRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); });
     }
-    return () => { [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); }); };
+    return () => { [progressRef, dotRef, codeRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); }); };
   }, [runState]);
 
   /* ─── Resizable drag ────────────────────────────────────────────── */
@@ -970,24 +987,29 @@ export default function RunPage() {
 
               {/* ── Loading state ── */}
               {runState === "loading" && (
-                <div className="flex flex-col items-center justify-center flex-1 gap-6 p-6">
-                  <div className="flex flex-col items-center gap-1">
+                <div className="flex flex-col items-center justify-center flex-1 gap-8 px-6 py-8">
+                  {/* Progress circle + status */}
+                  <div className="flex flex-col items-center gap-2">
                     <CircularProgress percent={progress} />
-                    <div className="h-9 flex items-center justify-center">
-                      <span className="text-[14px] font-medium text-[#737373]">
-                        {statusMessages[statusIdx]}{".".repeat(dotCount)}
-                      </span>
-                    </div>
+                    <span className="text-[14px] font-medium text-[#737373]">
+                      {statusMessages[statusIdx]}{".".repeat(dotCount)}
+                    </span>
                   </div>
-                  <div className="flex gap-2 p-4 border bg-white transition-all"
-                       style={{ width: Math.min(356, 340), borderColor: "#e5e5e5", boxShadow: "0px 4px 12px 0px rgba(0,0,0,0.1)" }}>
-                    <div className="flex items-start pt-0.5 shrink-0">
-                      <img src="/assets/ic-info-circle.svg" width={18} height={18} alt="" />
+
+                  {/* Code snippet block — cycles every 5 s */}
+                  <div className="w-full max-w-[340px] overflow-hidden"
+                       style={{ background: "#0f0f0f", boxShadow: "0 4px 16px rgba(0,0,0,0.18)" }}>
+                    {/* Fake window chrome */}
+                    <div className="flex items-center gap-1.5 px-3 py-2" style={{ borderBottom: "1px solid #1f1f1f" }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
                     </div>
-                    <p className="text-[14px] font-medium text-[#0a0a0a] leading-5 flex-1 min-w-0" key={toastIdx}
-                       style={{ animation: "fadeIn 0.4s ease" }}>
-                      {toastMessages[toastIdx]}
-                    </p>
+                    <pre key={codeIdx}
+                         className="px-4 py-3 text-[12px] font-mono leading-5 overflow-x-auto"
+                         style={{ color: "#a3a3a3", animation: "fadeIn 0.5s ease", margin: 0, whiteSpace: "pre" }}>
+                      {codeSnippets[codeIdx]}
+                    </pre>
                   </div>
                 </div>
               )}
@@ -1264,72 +1286,106 @@ export default function RunPage() {
 
               {/* ── Result tab ── */}
               {activeTab === "result" && runState === "done" && (
-                <div className="flex-1 min-h-0 overflow-auto px-5 py-4">
+                <div className="flex-1 min-h-0 overflow-auto">
                   {resultTab === "preview" && (
-                    <div style={{ fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "#374151" }}>
-                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>Image Description</h2>
-                      <p style={{ margin: "0 0 16px", color: "#4b5563" }}>
-                        This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green
-                        paper bag from Uber Eats placed on a concrete step in front of a dark door.
-                      </p>
+                    <div className="flex flex-col gap-3 p-[10px]">
 
-                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Delivery Bag</h2>
-                      <p style={{ margin: "0 0 8px", color: "#4b5563" }}>A bright green paper bag with brown paper handles sits on the doorstep.</p>
-                      <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-                        {[
-                          'Branding: The bag is prominently branded with the Uber Eats logo in a dark, sans-serif font. The word "Uber" is stacked on top of the word "Eats".',
-                          "Contents: The bag is open, and several items are visible inside:",
-                          "A bouquet of fresh flowers, including red and yellow tulips.",
-                          "A pink rectangular box.",
-                          "A clear glass or bottle.",
-                        ].map((item, i) => (
-                          <li key={i} style={{ color: "#4b5563", fontSize: 13 }}>{item}</li>
-                        ))}
-                      </ul>
-
-                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Setting</h2>
-                      <p style={{ margin: "0 0 8px", color: "#4b5563" }}>The delivery is set in an outdoor entryway, surrounded by nature.</p>
-                      <ul style={{ paddingLeft: 20, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-                        {[
-                          "Doorstep: The bag rests on a textured, light-colored concrete step.",
-                          "Door and Walls: Behind the bag is a dark, solid-colored door or wall. To the left and right are concrete walls.",
-                          "Foliage: The scene is framed with lush greenery. To the left, vines and small-leafed plants grow up the concrete wall. To the right of the door, there are more plants with long, thin, light-green leaves.",
-                          "Structure: On the far right, a wooden structure with vertical slats, possibly a fence or part of the house's exterior, is visible.",
-                        ].map((item, i) => (
-                          <li key={i} style={{ color: "#4b5563", fontSize: 13 }}>{item}</li>
-                        ))}
-                      </ul>
-
-                      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 8px" }}>The Person</h2>
-                      <p style={{ margin: "0 0 16px", color: "#4b5563" }}>
-                        In the bottom-right foreground, the back of a person's head and shoulder are partially visible. They have
-                        blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking
-                        down towards the delivery bag.
-                      </p>
-
-                      {/* Styled image area — no imported image, designed representation */}
-                      <div style={{
-                        borderRadius: 4, overflow: "hidden", height: 168,
-                        background: "linear-gradient(145deg, #1c2b3a 0%, #0d1a24 55%, #1a2e1a 100%)",
-                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                        position: "relative",
-                      }}>
-                        {/* Greenery blobs */}
-                        <div style={{ position: "absolute", bottom: 0, left: 0, width: 100, height: 130,
-                          background: "radial-gradient(ellipse at 20% 85%, rgba(34,197,94,0.22) 0%, transparent 70%)" }} />
-                        <div style={{ position: "absolute", bottom: 0, right: 20, width: 80, height: 110,
-                          background: "radial-gradient(ellipse at 75% 90%, rgba(21,128,61,0.28) 0%, transparent 70%)" }} />
-                        {/* Bag silhouette */}
-                        <div style={{ width: 48, height: 60, background: "rgba(34,197,94,0.68)", borderRadius: "4px 4px 5px 5px", position: "relative", marginBottom: 6 }}>
-                          <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
-                            width: 28, height: 12, borderTop: "4px solid rgba(110,70,30,0.8)",
-                            borderLeft: "4px solid rgba(110,70,30,0.8)", borderRight: "4px solid rgba(110,70,30,0.8)",
-                            borderRadius: "8px 8px 0 0" }} />
+                      {/* Image Description */}
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Image Description</p>
                         </div>
-                        <div style={{ color: "rgba(255,255,255,0.32)", fontSize: 10, letterSpacing: "0.04em" }}>
-                          morgan-stanley-research.pdf · page {currentPage}
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green paper bag from Uber Eats placed on a concrete step in front of a dark door.
+                          </p>
                         </div>
                       </div>
+
+                      {/* The Delivery Bag */}
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">The Delivery Bag</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <p className="leading-5">A bright green paper bag with brown paper handles sits on the doorstep.</p>
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Branding: The bag is prominently branded with the Uber Eats logo in a dark, sans-serif font. The word &quot;Uber&quot; is stacked on top of the word &quot;Eats&quot;.</li>
+                            <li>Contents: The bag is open, and several items are visible inside:</li>
+                            <li>A bouquet of fresh flowers, including red and yellow tulips.</li>
+                            <li>A pink rectangular box.</li>
+                            <li>A clear glass or bottle.</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* The Setting */}
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">The Setting</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <p className="leading-5">The delivery is set in an outdoor entryway, surrounded by nature.</p>
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Doorstep: The bag rests on a textured, light-colored concrete step.</li>
+                            <li>Door and Walls: Behind the bag is a dark, solid-colored door or wall. To the left and right are concrete walls.</li>
+                            <li>Foliage: The scene is framed with lush greenery. To the left, vines and small-leafed plants grow up the concrete wall. To the right of the door, there are more plants with long, thin, light-green leaves.</li>
+                            <li>Structure: On the far right, a wooden structure with vertical slats, possibly a fence or part of the house&apos;s exterior, is visible.</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* The Person */}
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">The Person</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            In the bottom-right foreground, the back of a person&apos;s head and shoulder are partially visible. They have blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking down towards the delivery bag.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Image representation */}
+                      <div style={{
+                        width: "100%", aspectRatio: "3573/1049", position: "relative", overflow: "hidden",
+                        background: "linear-gradient(135deg, #0d1a0d 0%, #1a2e1a 40%, #1c2b1c 60%, #0d190d 100%)",
+                      }}>
+                        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 80%, rgba(34,197,94,0.35) 0%, transparent 55%)" }} />
+                        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 70% 60%, rgba(21,128,61,0.25) 0%, transparent 50%)" }} />
+                        <div style={{ position: "absolute", bottom: "15%", left: "40%", transform: "translateX(-50%)", width: 32, height: 42,
+                          background: "rgba(34,197,94,0.75)", borderRadius: "3px 3px 4px 4px" }}>
+                          <div style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)",
+                            width: 20, height: 9, borderTop: "3px solid rgba(110,70,30,0.9)",
+                            borderLeft: "3px solid rgba(110,70,30,0.9)", borderRight: "3px solid rgba(110,70,30,0.9)",
+                            borderRadius: "6px 6px 0 0" }} />
+                          <div style={{ position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)",
+                            fontSize: 6, color: "rgba(255,255,255,0.8)", fontWeight: 700, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
+                            Uber<br/>Eats
+                          </div>
+                        </div>
+                        <div style={{ position: "absolute", top: "30%", right: "20%", width: 28, height: 48,
+                          background: "rgba(239,68,68,0.55)", borderRadius: 2 }} />
+                      </div>
+
+                      {/* Additional extracted fields */}
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[14px] font-semibold text-[#171717] leading-none">Uber Technologies, Inc. Q1 2025 Earnings Supplemental Data</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[14px] font-semibold text-[#171717] leading-none">May 7, 2025</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Non-GAAP Financial Measures Disclosure</p>
+                        </div>
+                      </div>
+
                     </div>
                   )}
 
