@@ -15,13 +15,35 @@ const Ic = {
     </svg>
   ),
   MoveLeft: () => (
+    /* Lucide ArrowLeft — proper back arrow */
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 8L2 12l4 4"/><path d="M2 12h13"/><path d="M15 4v16"/>
+      <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
     </svg>
   ),
   Play: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    /* Stroked play — no fill */
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="5 3 19 12 5 21 5 3"/>
+    </svg>
+  ),
+  ChevronLeft: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+  ),
+  ZoomIn: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/>
+    </svg>
+  ),
+  ZoomOut: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/>
+    </svg>
+  ),
+  RotateCcw: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
     </svg>
   ),
   Upload: () => (
@@ -397,10 +419,7 @@ export default function RunPage() {
   const [handleHovered, setHandleHovered] = useState(false);
 
   /* ── Schema rows state ── */
-  const [schemaRows, setSchemaRows] = useState<SchemaRow[]>([
-    { id: 1, name: "UPPER CAP",  type: "String", desc: "Upper cap as on March 31, 2017 during instrument Government Debt-General in Revised Limits by FPI", editing: false },
-    { id: 2, name: "990 form",   type: "Number", desc: "Percentage Holding", editing: false },
-  ]);
+  const [schemaRows, setSchemaRows] = useState<SchemaRow[]>([]);
   const nextIdRef = useRef(3);
 
   /* ─── Derived ─────────────────────────────────────── */
@@ -583,7 +602,7 @@ export default function RunPage() {
                         disabled={currentPage === 1}
                         className="flex items-center justify-center w-8 h-8 transition-colors"
                         style={{ color: currentPage === 1 ? "#d4d4d4" : "#737373", cursor: currentPage === 1 ? "not-allowed" : "pointer" }}>
-                        <FigmaIcon src="/assets/ic-chevron-left.svg" size={16} />
+                        <Ic.ChevronLeft />
                       </button>
                     </Tooltip>
                     <div className="flex items-center justify-center border bg-white text-[13px] font-medium text-[#0a0a0a] shrink-0"
@@ -597,7 +616,7 @@ export default function RunPage() {
                         disabled={currentPage === totalPages}
                         className="flex items-center justify-center w-8 h-8 transition-colors"
                         style={{ color: currentPage === totalPages ? "#d4d4d4" : "#737373", cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}>
-                        <FigmaIcon src="/assets/ic-chevron-right-sm.svg" size={16} />
+                        <Ic.ChevronRight />
                       </button>
                     </Tooltip>
                   </div>
@@ -607,7 +626,7 @@ export default function RunPage() {
                       <button onClick={zoomIn} disabled={zoomLevel >= ZOOM_MAX}
                               className="flex items-center justify-center w-8 h-8 transition-colors"
                               style={{ color: zoomLevel >= ZOOM_MAX ? "#d4d4d4" : "#737373", cursor: zoomLevel >= ZOOM_MAX ? "not-allowed" : "pointer" }}>
-                        <FigmaIcon src="/assets/ic-zoom-in.svg" size={16} />
+                        <Ic.ZoomIn />
                       </button>
                     </Tooltip>
                     <div className="flex items-center justify-center border bg-white text-[13px] font-medium text-[#737373] shrink-0"
@@ -618,13 +637,13 @@ export default function RunPage() {
                       <button onClick={zoomOut} disabled={zoomLevel <= ZOOM_MIN}
                               className="flex items-center justify-center w-8 h-8 transition-colors"
                               style={{ color: zoomLevel <= ZOOM_MIN ? "#d4d4d4" : "#737373", cursor: zoomLevel <= ZOOM_MIN ? "not-allowed" : "pointer" }}>
-                        <FigmaIcon src="/assets/ic-zoom-out.svg" size={16} />
+                        <Ic.ZoomOut />
                       </button>
                     </Tooltip>
                     <Tooltip label="Reset zoom" placement="bottom">
                       <button onClick={zoomReset}
                               className="flex items-center justify-center w-8 h-8 text-[#737373] hover:text-[#171717] transition-colors">
-                        <FigmaIcon src="/assets/ic-redo.svg" size={16} />
+                        <Ic.RotateCcw />
                       </button>
                     </Tooltip>
                   </div>
@@ -644,15 +663,12 @@ export default function RunPage() {
                     paddingLeft: 16,
                     paddingRight: 16,
                   }}>
-                    {/* Designed PDF page — no imported image */}
-                    <div className="w-full bg-white shadow-sm" style={{ maxWidth: 520, padding: "52px 60px", minHeight: 680 }}>
-                      <PdfPageContent page={currentPage} highlight={citationsOn && runState === "done"} />
-                    </div>
-                    {currentPage < totalPages && (
-                      <div className="w-full bg-white shadow-sm" style={{ maxWidth: 520, padding: "52px 60px", minHeight: 680 }}>
-                        <PdfPageContent page={currentPage + 1} highlight={citationsOn && runState === "done"} />
+                    {/* Designed PDF pages — fill canvas width, show up to 6 pages */}
+                    {Array.from({ length: Math.min(6, totalPages - currentPage + 1) }, (_, i) => currentPage + i).map(pg => (
+                      <div key={pg} className="w-full bg-white shadow-sm" style={{ padding: "52px 60px", minHeight: 680 }}>
+                        <PdfPageContent page={pg} highlight={citationsOn && runState === "done"} />
                       </div>
-                    )}
+                    ))}
                   </div>
                 </div>
               </>
@@ -774,8 +790,8 @@ export default function RunPage() {
                     style={canRun && runState !== "loading" ? {
                       background: "#2563eb", color: "white", border: "1px solid #2563eb", cursor: "pointer",
                     } : {
-                      background: "transparent", color: "#2563eb",
-                      border: "1px solid #2563eb", opacity: 0.45, cursor: "not-allowed",
+                      background: "#2563eb", color: "white",
+                      border: "1px solid #2563eb", opacity: 0.5, cursor: "not-allowed",
                     }}>
                     <Ic.Play /> Run Parse
                   </button>
@@ -1016,8 +1032,7 @@ export default function RunPage() {
                           )}
                           <div className="shrink-0 flex items-center justify-center px-2" style={{ width: 52 }}>
                             <button onClick={() => deleteRow(row.id)}
-                                    className="flex items-center justify-center w-8 h-8 border bg-white hover:bg-red-50 transition-colors text-[#737373] hover:text-red-500"
-                                    style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+                                    className="flex items-center justify-center w-8 h-8 hover:bg-red-50 transition-colors text-[#737373] hover:text-red-500">
                               <Ic.Trash />
                             </button>
                           </div>

@@ -109,31 +109,36 @@ export default function PlaygroundPage() {
              style={{ width: sidebarOpen ? 304 : 48 }}>
 
         {/* Header — spans full sidebar width */}
-        <div className="flex items-center justify-between border-b border-r shrink-0 overflow-hidden"
-             style={{
-               borderColor: "#e4e4e7",
-               background: "#fafafa",
-               height: 49,
-               paddingLeft: 16,
-               paddingRight: sidebarOpen ? 12 : 6,
+        <div className="border-b border-r shrink-0 overflow-hidden"
+             style={{ borderColor: "#e4e4e7", background: "#fafafa", height: 49,
+               display: "flex", alignItems: "center",
+               justifyContent: sidebarOpen ? "space-between" : "center",
+               paddingLeft: sidebarOpen ? 16 : 0,
+               paddingRight: sidebarOpen ? 12 : 0,
              }}>
-          <div className="flex items-center gap-2 min-w-0">
-            {/* Actual Unsiloed AI logo from Figma */}
-            <img src="/assets/unsiloed-logo.png" width={17} height={17} alt="Unsiloed AI" style={{ flexShrink: 0 }} />
-            {sidebarOpen && (
-              <span className="font-semibold text-[15px] text-[#171717] leading-none whitespace-nowrap">
-                Unsiloed AI
-              </span>
-            )}
-          </div>
           {sidebarOpen ? (
+            <>
+              <div className="flex items-center gap-2 min-w-0">
+                <img src="/assets/unsiloed-logo.png" width={17} height={17} alt="Unsiloed AI" style={{ flexShrink: 0 }} />
+                <span className="font-semibold text-[15px] text-[#171717] leading-none whitespace-nowrap">
+                  Unsiloed AI
+                </span>
+              </div>
+              <button
+                className="p-1.5 border text-[#737373] hover:text-[#171717] transition-colors shrink-0"
+                style={{ borderColor: "#e5e5e5" }}
+                onClick={() => setSidebarOpen(false)}>
+                <IcPanelClose />
+              </button>
+            </>
+          ) : (
+            /* Collapsed: expand button lives here, not in the icon rail */
             <button
-              className="p-1.5 border text-[#737373] hover:text-[#171717] transition-colors shrink-0"
-              style={{ borderColor: "#e5e5e5" }}
-              onClick={() => setSidebarOpen(false)}>
-              <IcPanelClose />
+              className="flex items-center justify-center w-full h-full text-[#737373] hover:text-[#171717] transition-colors"
+              onClick={() => setSidebarOpen(true)}>
+              <IcPanelOpen />
             </button>
-          ) : null}
+          )}
         </div>
 
         {/* Body: icon rail (always) + text nav (conditional) */}
@@ -142,15 +147,7 @@ export default function PlaygroundPage() {
           {/* ── Icon rail ── always visible ────────────────────── */}
           <div className="flex flex-col items-center pt-3 shrink-0 border-r"
                style={{ width: 48, background: "#fafafa", borderColor: "#e4e4e7" }}>
-
-            {/* Expand button appears in icon rail when collapsed */}
-            {!sidebarOpen && (
-              <button
-                className="flex items-center justify-center w-8 h-8 mb-1 text-[#737373] hover:bg-neutral-100 transition-colors"
-                onClick={() => setSidebarOpen(true)}>
-                <IcPanelOpen />
-              </button>
-            )}
+            {/* No expand button here — it lives in the header above */}
 
             <div className="flex flex-col gap-1 flex-1">
               <TooltipIcon label="Home">
@@ -182,10 +179,12 @@ export default function PlaygroundPage() {
               <div className="flex flex-col gap-0.5 px-2">
                 {/* Playground – active */}
                 <button className="flex items-center gap-2 h-8 px-2 w-full text-left bg-blue-100 text-blue-600 text-[14px] font-medium">
-                  {/* Exact Gamepad2 icon from Figma */}
-                  <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                    <FigmaIcon src="/assets/ic-gamepad.svg" />
-                  </span>
+                  {/* Lucide Gamepad2 — inline so it never stretches */}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/>
+                    <line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/>
+                    <path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>
+                  </svg>
                   Playground
                 </button>
                 {/* Workflows – locked */}
