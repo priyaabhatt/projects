@@ -533,8 +533,41 @@ export default function RunPage() {
   /* ─── Loading animation ─────────────────────────────────────────── */
   function startLoading() {
     if (!canRun) return;
-    setRunState("done");
+    [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) { clearInterval(r.current); r.current = null; } });
+
     setActiveTab("result");
+    setRunState("loading");
+    setProgress(0);
+    setStatusIdx(0);
+    setToastIdx(0);
+    setDotCount(1);
+
+    const TOTAL_MS = 10_000;
+    const STEP_MS  = 100;
+    const start = performance.now();
+
+    progressRef.current = setInterval(() => {
+      const elapsed = performance.now() - start;
+      const pct = Math.min(100, (elapsed / TOTAL_MS) * 100);
+      setProgress(pct);
+      if (elapsed >= TOTAL_MS) {
+        if (progressRef.current) { clearInterval(progressRef.current); progressRef.current = null; }
+        setProgress(100);
+        setRunState("done");
+      }
+    }, STEP_MS);
+
+    statusRef.current = setInterval(() => {
+      setStatusIdx(i => Math.min(statusMessages.length - 1, i + 1));
+    }, Math.floor(TOTAL_MS / statusMessages.length));
+
+    toastRef.current = setInterval(() => {
+      setToastIdx(i => (i + 1) % toastMessages.length);
+    }, 3300);
+
+    dotRef.current = setInterval(() => {
+      setDotCount(c => (c % 3) + 1);
+    }, 400);
   }
 
   useEffect(() => {
