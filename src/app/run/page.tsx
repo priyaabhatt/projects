@@ -556,6 +556,7 @@ export default function RunPage() {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         rafRef.current = null;
+        if (toastRef.current !== null) { clearInterval(toastRef.current); toastRef.current = null; }
         setTimeout(() => setRunState("done"), 600);
       }
     };
@@ -566,16 +567,13 @@ export default function RunPage() {
     }, 5000);
   }
 
+  /* Unmount cleanup only — never cancel timers on intermediate renders. */
   useEffect(() => {
-    if (runState !== "loading") {
-      if (rafRef.current   !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-      if (toastRef.current !== null) { clearInterval(toastRef.current);      toastRef.current = null; }
-    }
     return () => {
       if (rafRef.current   !== null) cancelAnimationFrame(rafRef.current);
       if (toastRef.current !== null) clearInterval(toastRef.current);
     };
-  }, [runState]);
+  }, []);
 
   /* ─── Resizable drag ────────────────────────────────────────────── */
   const onMouseMove = useCallback((e: MouseEvent) => {
