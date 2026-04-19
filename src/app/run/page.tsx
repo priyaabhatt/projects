@@ -217,189 +217,225 @@ const statusMessages = [
 
 type SchemaRow = { id: number; name: string; type: string; desc: string; editing: boolean };
 
-/* ─── Citation map: result section → PDF page + highlight region ──── */
-type CitationRef = { page: number; top: number; left: number; width: number; height: number };
-const CITATIONS: Record<string, CitationRef> = {
-  "image-desc":   { page: 1,  top: 18, left: 8,  width: 84, height: 14 },
-  "delivery-bag": { page: 12, top: 24, left: 12,  width: 81, height: 28 },
-  "the-setting":  { page: 8,  top: 42, left: 8,  width: 84, height: 26 },
-  "the-person":   { page: 15, top: 52, left: 8,  width: 84, height: 16 },
-  "the-image":    { page: 5,  top: 22, left: 8,  width: 84, height: 38 },
+/* ─── Citation map: result section → PDF container ID ──────────────── */
+const CITATIONS: Record<string, string> = {
+  "newsletter-title":  "title",
+  "intro":             "intro",
+  "capital-raised":    "new-capital",
+  "new-owners":        "new-owners-1",
+  "meetings-stat":     "stat-meetings",
+  "partners-list":     "names-list",
+  "sales":             "sales",
+  "team-updates":      "team-members",
+  "new-mentor":        "new-mentor",
+  "us-trip":           "us-trip",
+  "nab":               "nab",
+  "wwdc":              "wwdc",
+  "launch-date":       "development",
+  "agm":               "agm",
 };
 
 /* ─── Preview result text (used for copy / download) ─────────────── */
-const PREVIEW_CONTENT = `## Image Description
+const PREVIEW_CONTENT = `## Newsletter Title
 
-This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green paper bag from Uber Eats placed on a concrete step in front of a dark door.
+DrylabNews — for investors & friends · May 2017
 
-## The Delivery Bag
+## Capital Raised
 
-A bright green paper bag with brown paper handles sits on the doorstep.
+5 MNOK total: 2.13 MNOK investment round + 2.05 MNOK Innovation Norway loan + Filmlance International dev agreement.
 
-- Branding: The bag is prominently branded with the Uber Eats logo in a dark, sans-serif font. The word "Uber" is stacked on top of the word "Eats".
-- Contents: The bag is open, and several items are visible inside:
-- A bouquet of fresh flowers, including red and yellow tulips.
-- A pink rectangular box.
-- A clear glass or bottle.
+## New Owners
 
-## The Setting
+Unni Jacobsen, Torstein Jahr, Suzanne Bolstad, Eivind Bergene, Turid Brun, Vigdis Trondsen, Lea Blindheim, Kristine Holmsen, Torstein Hansen, Jostein Aanensen.
 
-The delivery is set in an outdoor entryway, surrounded by nature.
+## Sales Performance
 
-- Doorstep: The bag rests on a textured, light-colored concrete step.
-- Door and Walls: Behind the bag is a dark, solid-colored door or wall. To the left and right are concrete walls.
-- Foliage: The scene is framed with lush greenery. To the left, vines and small-leafed plants grow up the concrete wall.
-- Structure: On the far right, a wooden structure with vertical slats, possibly a fence or part of the house's exterior, is visible.
+- Return customer rate: 80%
+- Revenue Jan–Apr 2017: 200 kNOK (vs 339 kNOK total in 2016)
+- New markets: Canada (Film Factory Montreal), France (Lumiere Numeriques)
+- Notable user: Gareth Unwin, producer of "The King's Speech"
 
-## The Person
+## Team Updates
 
-In the bottom-right foreground, the back of a person's head and shoulder are partially visible. They have blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking down towards the delivery bag.
+Two permanent developers in Łódź, two interns from U of Oslo's Entrepreneurship Program, two CS interns on ML/Swift.
+
+## USA Tour
+
+Pontus and Audun visited New York, St. Louis, San Francisco, Los Angeles in Feb–Mar. Met Netflix, AMPAS, ICG, Local 871, Apple.
+
+## NAB Convention
+
+Andreas and Audun attended NAB in Las Vegas (April). Met PIX System, attended DIT-WIT party. Discussed cloud with Amazon, Google, IBM.
+
+## Launch Date
+
+Drylab 3.0 launches at IBC Amsterdam — September 2017.
+
+## Annual General Meeting
+
+June 16, 2017 at 15:00.
 `;
 
-/* ─── PDF page rendered as styled HTML ───────────────────────────── */
-function Hl({ on, children }: { on: boolean; children: ReactNode }) {
-  return on
-    ? <mark style={{ background: "rgba(253,224,71,0.45)", borderRadius: 2, padding: "0 1px" }}>{children}</mark>
-    : <>{children}</>;
+/* ─── Drylab newsletter (PrinceXML sample) — paragraph blocks ────── */
+type PdfBlock = {
+  id: string;
+  page: number;
+  type: "title" | "subtitle" | "para" | "para-bold" | "stat" | "names" | "footnote";
+  content: ReactNode;
+};
+
+const PDF_BLOCKS: PdfBlock[] = [
+  /* ───────── PAGE 1 ───────── */
+  { id: "title",      page: 1, type: "title",    content: "DrylabNews" },
+  { id: "subtitle",   page: 1, type: "subtitle", content: "for investors & friends · May 2017" },
+  { id: "intro",      page: 1, type: "para",     content: "Welcome to our first newsletter of 2017! It's been a while since the last one, and a lot has happened. We promise to keep them coming every two months hereafter, and permit ourselves to make this one rather long. The big news is the beginnings of our launch in the American market, but there are also interesting updates on sales, development, mentors and (of course) the investment round that closed in January." },
+  { id: "new-capital", page: 1, type: "para",
+    content: <><strong>New capital:</strong> The investment round was successful. We raised 2.13 MNOK to match the 2.05 MNOK loan from Innovation Norway. Including the development agreement with Filmlance International, the total new capital is 5 MNOK, partly tied to the successful completion of milestones. All formalities associated with this process are now finalized.</> },
+  { id: "new-owners-1", page: 1, type: "para",
+    content: <><strong>New owners:</strong> We would especially like to warmly welcome our new owners to the Drylab family: Unni Jacobsen, Torstein Jahr, Suzanne Bolstad, Eivind Bergene, Turid Brun, Vigdis Trondsen, Lea Blindheim, Kristine</> },
+  { id: "stat-meetings", page: 1, type: "stat",  content: "" },
+  { id: "names-list",  page: 1, type: "names",
+    content: "Academy of Motion Picture Arts and Sciences · Alesha & Jamie Metzger · Amazon AWS · Apple · Caitlin Burns, PGA · Carlos Melcer · Chimney L.A. · Dado Valentic · Dave Stump · DIT WIT · ERA NYC · Facebook · Fancy Film · FilmLight · Geo Labelle · Google · IBM · Innovation Norway (NYC) · Innovation Norway (SF) · International Cinematographers Guild · NBC · Local 871 · Netflix · Pomfort · Radiant Images · Screening Room · Signiant · Moods of Norway · Tapad · Team Downey" },
+
+  /* ───────── PAGE 2 ───────── */
+  { id: "owners-cont", page: 2, type: "para",
+    content: "Holmsen, Torstein Hansen, and Jostein Aanensen. We look forward to working with you!" },
+  { id: "sales", page: 2, type: "para",
+    content: <><strong>Sales:</strong> Return customer rate is now 80%, proving value and willingness to pay. Film Factory Montreal is our first customer in Canada. Lumiere Numeriques have started using us in France. We also have new customers in Norway, and high-profile users such as Gareth Unwin, producer of Oscar-winning <em>The King&apos;s Speech</em>. Revenue for the first four months is 200 kNOK, compared to 339 kNOK for all of 2016. We are working on a partnership to safeguard sales in Norway while beginning to focus more on the US.</> },
+  { id: "team-members", page: 2, type: "para",
+    content: <><strong>New team members:</strong> We&apos;ve extended our organization with two permanent developers based in Łódź, the film capital of Poland. Two highly skilled interns from the University of Oslo&apos;s Entrepreneurship Program, will be working on market research until mid-June (starting in March), preparing for the US launch. Also, two computer science students are working as part-time interns during spring, on machine learning and analysis research, as well as innovative architectures based on the Swift language. We hope our interns will consider sticking around!</> },
+  { id: "new-mentor", page: 2, type: "para",
+    content: <><strong>New mentor:</strong> We are honored to have Caitlin Burns joining us as a mentor. She&apos;s an accomplished producer based in New York, an active member of the Producers Guild of America, and the collaboration has already yielded good results, including valuable contacts for our visit in Los Angeles. Oscar-winning VFX supervisor <strong>Dave Stump</strong> joined us earlier.</> },
+  { id: "us-trip", page: 2, type: "para",
+    content: <><strong>New York, St. Louis, San Francisco and Los Angeles:</strong> Pontus and Audun did a tour of the US in February and March, meeting users, partners and potential customers. The trip was very successful, with several high points, including meetings with Netflix, the Academy of Motion Picture Arts and Sciences, the International Cinematographers Guild, Local 871 (the script supervisors&apos; union), one of the world&apos;s leading DITs, and Apple. See the separate attachment for a more detailed summary.</> },
+  { id: "nab", page: 2, type: "para",
+    content: <><strong>NAB:</strong> Andreas and Audun travelled to the National Association of Broadcasters convention (NAB) in Las Vegas for three hectic days in April. NAB gathers 100,000 participants from film and TV. It&apos;s a very efficient way of meeting people in the business, and getting an updated picture of the business landscape. The most exciting meeting was with PIX System, one of our most important competitors. It was interesting to note that they regarded the indie market as bigger than their own.</> },
+
+  /* ───────── PAGE 3 ───────── */
+  { id: "nab-cont", page: 3, type: "para",
+    content: "Andreas was able to secure us an invitation to the DIT-WIT party, with some of the world's leading DITs in attendance. It was a great place for informal feedback on Drylab Viewer. The pattern was the same as for other users: Initial polite interest turns to real enthusiasm the moment someone is able to personally try Drylab Viewer! We also met with Pomfort and Apple about our on-going collaborations; ARRI and Teradek/Paralinx about camera integration; Amazon, Google and IBM about cloud computing." },
+  { id: "wwdc", page: 3, type: "para",
+    content: <><strong>WWDC and Silicon Valley:</strong> We were very pleasantly surprised to be invited by Apple to their World Wide Developers Conference in San Jose in June, despite not having applied. It&apos;s a valuable chance to learn and make new connections. We&apos;re also setting aside time to meet other potential partners.</> },
+  { id: "cine-gear", page: 3, type: "para",
+    content: <><strong>Cine Gear:</strong> We have decided not to attend the Cine Gear expo in L.A. this year, since feedback from many users about the show were mixed, and our planned beta version of 3.0 is slightly delayed.</> },
+  { id: "development", page: 3, type: "para",
+    content: <><strong>Development and launch:</strong> Development is around one month behind our original schedule. We expect the delay to decrease, with new developers on board. The launch of Drylab 3.0 will take place at the International Broadcasters Convention in Amsterdam in September, and we are working hard to get solid feedback from pilot users before then.</> },
+  { id: "agm", page: 3, type: "para",
+    content: <><strong>Annual General Meeting:</strong> Drylab&apos;s AGM will be held on June 16th at 15:00. An invitation will be distributed to all owners well in advance. We hope to see you there!</> },
+  { id: "closing", page: 3, type: "para-bold",
+    content: "As you can see it has been a hectic spring that has given us a lot of confirmation about our product. We are now working eagerly and hard towards the US launch with Drylab 3.0, while keeping momentum in Europe with our existing system." },
+  { id: "footnote", page: 3, type: "footnote",
+    content: "[Drylab has kindly allowed this newsletter to be redone in HTML/CSS and converted to PDF with Prince. Navngen helped anonymize names in the process.]" },
+];
+
+function DrylabBlock({
+  block, isActive, onRef,
+}: {
+  block: PdfBlock;
+  isActive: boolean;
+  onRef: (el: HTMLDivElement | null) => void;
+}) {
+  const baseStyle: CSSProperties = {
+    border: isActive ? "1px solid #2563eb" : "1px solid transparent",
+    background: isActive ? "#eff6ff" : "transparent",
+    transition: "background 0.2s ease, border-color 0.2s ease",
+    padding: "8px 10px",
+    margin: "0 -10px 6px",
+    scrollMarginTop: 16,
+  };
+
+  switch (block.type) {
+    case "title":
+      return (
+        <div ref={onRef} style={{ ...baseStyle, padding: "16px 10px 4px", textAlign: "center" }}>
+          <h1 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "44pt", fontWeight: 700, letterSpacing: "-0.02em", margin: 0, color: "#0a0a0a" }}>
+            {block.content}
+          </h1>
+        </div>
+      );
+    case "subtitle":
+      return (
+        <div ref={onRef} style={{ ...baseStyle, padding: "0 10px 18px", textAlign: "center" }}>
+          <p style={{ fontFamily: "Georgia, serif", fontSize: "11pt", fontStyle: "italic", color: "#666", margin: 0 }}>
+            {block.content}
+          </p>
+        </div>
+      );
+    case "stat":
+      return (
+        <div ref={onRef} style={{
+          ...baseStyle,
+          background: isActive ? "#eff6ff" : "#f5f5f5",
+          padding: "16px 20px",
+          margin: "10px 0",
+          textAlign: "center",
+        }}>
+          <div style={{ fontFamily: "Georgia, serif", fontSize: "36pt", fontWeight: 700, lineHeight: 1, color: "#0a0a0a", marginBottom: 4 }}>34</div>
+          <div style={{ fontSize: "10pt", textTransform: "uppercase", letterSpacing: "0.12em", color: "#666", marginBottom: 8 }}>meetings</div>
+          <div style={{ fontSize: "10pt", color: "#666", lineHeight: 1.4 }}>NY · SF<br/>LA · LV</div>
+        </div>
+      );
+    case "names":
+      return (
+        <div ref={onRef} style={{
+          ...baseStyle,
+          padding: "12px 12px",
+          margin: "16px 0",
+          borderTop: isActive ? "1px solid #2563eb" : "2px solid #ccc",
+          borderBottom: isActive ? "1px solid #2563eb" : "2px solid #ccc",
+          borderLeft: isActive ? "1px solid #2563eb" : "1px solid transparent",
+          borderRight: isActive ? "1px solid #2563eb" : "1px solid transparent",
+        }}>
+          <p style={{ fontFamily: "Georgia, serif", fontSize: "9pt", lineHeight: 1.6, color: "#666", textAlign: "justify", margin: 0 }}>
+            {block.content}
+          </p>
+        </div>
+      );
+    case "footnote":
+      return (
+        <div ref={onRef} style={{ ...baseStyle, padding: "12px 10px", margin: "20px 0 0" }}>
+          <p style={{ fontFamily: "Georgia, serif", fontSize: "8.5pt", fontStyle: "italic", color: "#888", margin: 0, textAlign: "center" }}>
+            {block.content}
+          </p>
+        </div>
+      );
+    case "para-bold":
+      return (
+        <div ref={onRef} style={baseStyle}>
+          <p style={{ fontFamily: "Georgia, serif", fontSize: "12pt", fontWeight: 600, lineHeight: 1.6, margin: 0, color: "#0a0a0a" }}>
+            {block.content}
+          </p>
+        </div>
+      );
+    case "para":
+    default:
+      return (
+        <div ref={onRef} style={baseStyle}>
+          <p style={{ fontFamily: "Georgia, serif", fontSize: "10.5pt", lineHeight: 1.65, margin: 0, textAlign: "justify", color: "#1a1a1a" }}>
+            {block.content}
+          </p>
+        </div>
+      );
+  }
 }
 
-function PdfPageContent({ page, highlight }: { page: number; highlight: boolean }) {
-  const bodyStyle: CSSProperties = {
-    fontFamily: "'Times New Roman', Times, serif",
-    fontSize: "10.5pt",
-    lineHeight: 1.68,
-    color: "#111",
-  };
-  const h1Style: CSSProperties = { fontWeight: "bold", fontSize: "11pt", letterSpacing: "0.06em", textAlign: "center", marginBottom: 22 };
-  const secHead: CSSProperties = { display: "flex", gap: 14, fontWeight: "bold", marginBottom: 6 };
-  const numCol: CSSProperties = { minWidth: 22, flexShrink: 0 };
-  const body: CSSProperties = { paddingLeft: 36, marginBottom: 8, textAlign: "justify" } as CSSProperties;
-  const ul: CSSProperties = { paddingLeft: 52, margin: "0 0 12px", display: "flex", flexDirection: "column", gap: 4 };
-  const footer: CSSProperties = { borderTop: "1px solid #ccc", marginTop: 32, paddingTop: 8, textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.06em" };
-
-  if (page !== 12) {
-    // Generic page for all other page numbers
-    return (
-      <div style={bodyStyle}>
-        <p style={h1Style}>SYSTEM DESIGN DOCUMENT</p>
-        {page === 1 ? (
-          <>
-            <p style={{ textAlign: "center", fontWeight: "bold", marginBottom: 18 }}>TABLE OF CONTENTS</p>
-            {[
-              "1  Introduction ......................................................................................  3",
-              "   1.1  Purpose ....................................................................................  3",
-              "   1.2  Scope ......................................................................................  4",
-              "   1.3  Definitions, Acronyms, and Abbreviations .........................................  4",
-              "2  System Overview ............................................................................  6",
-              "   2.1  System Context .........................................................................  6",
-              "   2.2  Major System Components ..........................................................  8",
-              "3  File and Database Design ...............................................................  12",
-              "   3.1  Database Management System Files ...........................................  12",
-              "   3.2  Non-Database Management System Files ....................................  13",
-              "4  Human-Machine Interface ................................................................  15",
-              "5  Requirements Traceability Matrix ....................................................  18",
-            ].map((line, i) => (
-              <p key={i} style={{ marginBottom: 2, fontFamily: "monospace", fontSize: "9.5pt", whiteSpace: "pre" }}>{line}</p>
-            ))}
-          </>
-        ) : (
-          <>
-            <div style={{ ...secHead, marginBottom: 10 }}>
-              <span style={numCol}>{page < 6 ? "1" : page < 10 ? "2" : "5"}</span>
-              <span>{page < 6 ? "INTRODUCTION" : page < 10 ? "SYSTEM OVERVIEW" : "REQUIREMENTS TRACEABILITY"}</span>
-            </div>
-            <p style={body}>
-              This section provides detailed information as required for understanding the system architecture
-              and design decisions for the project under development. Additional documentation may be provided
-              as appendices where applicable.
-            </p>
-            <p style={{ borderTop: "1px solid #ccc", marginTop: 32, paddingTop: 8, textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.06em" }}>
-              SYSTEM DESIGN DOCUMENT · Page {page}
-            </p>
-          </>
-        )}
-      </div>
-    );
-  }
-
+function PdfPageContent({ page, activeContainerId, registerContainer }: {
+  page: number;
+  activeContainerId: string | null;
+  registerContainer: (id: string, el: HTMLDivElement | null) => void;
+}) {
+  const blocks = PDF_BLOCKS.filter(b => b.page === page);
   return (
-    <div style={bodyStyle}>
-      <p style={h1Style}>SYSTEM DESIGN DOCUMENT</p>
-
-      {/* § 3 */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={secHead}><span style={numCol}>3</span><span>FILE AND DATABASE DESIGN</span></div>
-        <p style={body}>
-          Interact with the Database Administrator (DBA) when preparing this section. The section
-          should reveal the final design of all database management system (DBMS) files and the
-          non-DBMS files associated with the system under development. Additional information may
-          add as required for the particular project. Provide a comprehensive data dictionary showing
-          data element name, type, length, source, validation rules, maintenance (create, read, update,
-          delete (CRUD) capability), data stores, aliases, and description. Can be included as an appendix.
-        </p>
-      </div>
-
-      {/* § 3.1 */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={secHead}><span style={numCol}>3.1</span><span>Database Management System Files</span></div>
-        <p style={body}>
-          This section reveals the final design of the DBMS files and includes the following
-          information, as appropriate (refer to the data dictionary):
-        </p>
-        <ul style={ul}>
-          <li style={{ textAlign: "justify" }}>
-            <Hl on={highlight}>Refined logical model: provide normalized table layouts, entity relationship
-            diagrams, and other logical design information</Hl>
-          </li>
-          <li style={{ textAlign: "justify" }}>
-            A physical description of the DBMS schemas, sub-schemas, records, sets, tables, storage page sizes, etc.
-          </li>
-          <li style={{ textAlign: "justify" }}>
-            Access methods (such as indexed, via set, sequential, random access, sorted pointer array, etc.)
-          </li>
-          <li style={{ textAlign: "justify" }}>
-            <Hl on={highlight}>Estimate of the DBMS file size or volume of data within the file, and data pages,
-            including overhead resulting from access methods and free space</Hl>
-          </li>
-          <li style={{ textAlign: "justify" }}>
-            Definition of the update frequency of the database tables, views, files, areas, records, sets, and data
-            pages; estimate the number of transactions if the database is an online transaction-based system
-          </li>
-        </ul>
-      </div>
-
-      {/* § 3.2 */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={secHead}><span style={numCol}>3.2</span><span>Non-Database Management System Files</span></div>
-        <p style={body}>
-          In this section, provide the detailed description of all non-DBMS files and include a narrative
-          description of the usage of each file—including if the file is used for input, output, or both;
-          if this file is a temporary file; an indication of which modules read and write the file, etc.;
-          and file structures (refer to the data dictionary). As appropriate, the file structure information should:
-        </p>
-        <ul style={ul}>
-          <li style={{ textAlign: "justify" }}>Identify record structures, record keys or indexes, and reference data elements within the records</li>
-          <li style={{ textAlign: "justify" }}>Define record length (fixed or variable length) and blocking factors</li>
-          <li style={{ textAlign: "justify" }}>Define file access method—for example, indexed sequential, virtual sequential, random access, etc.</li>
-          <li style={{ textAlign: "justify" }}>
-            <Hl on={highlight}>Estimate the file size or volume of data within the file, including overhead resulting
-            from access methods and free space</Hl>
-          </li>
-          <li style={{ textAlign: "justify" }}>
-            Define the update frequency of the file; if the file is part of an online transaction-based system,
-            provide the estimated number of transactions per unit time, and the statistical mean, mode, and
-            distribution of those transactions
-          </li>
-        </ul>
-      </div>
-
-      {/* § 4 */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={secHead}><span style={numCol}>4</span><span>HUMAN-MACHINE INTERFACE</span></div>
-        <p style={body}>This section provides the detailed design of the system and subsystem inputs and outputs</p>
-      </div>
-
-      <p style={footer}>SYSTEM DESIGN DOCUMENT</p>
+    <div style={{ color: "#1a1a1a" }}>
+      {blocks.map(b => (
+        <DrylabBlock key={b.id}
+                     block={b}
+                     isActive={activeContainerId === b.id}
+                     onRef={el => registerContainer(b.id, el)} />
+      ))}
+      <p style={{ fontFamily: "Georgia, serif", textAlign: "center", fontSize: "8pt", color: "#aaa", letterSpacing: "0.08em", marginTop: 28, paddingTop: 8, borderTop: "1px solid #e5e5e5" }}>
+        DRYLAB NEWS · MAY 2017 · PAGE {page} OF 3
+      </p>
     </div>
   );
 }
@@ -422,7 +458,7 @@ export default function RunPage() {
   const dlToastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── PDF viewer state ── */
-  const totalPages = 24;
+  const totalPages = 3;
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomLevel, setZoomLevel]     = useState(100); // percent
   const ZOOM_STEP = 25;
@@ -431,6 +467,7 @@ export default function RunPage() {
   const DEFAULT_ZOOM = 100;
   const pdfScrollRef = useRef<HTMLDivElement>(null);
   const pageRefs     = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
 
   /* ── Loading animation state ── */
   const [progress, setProgress]         = useState(0);
@@ -478,18 +515,20 @@ export default function RunPage() {
   function zoomReset() { setZoomLevel(DEFAULT_ZOOM); }
 
   /* ─── Source citation derived state ────────────────────────────── */
-  const citedId       = citationsOn ? (hoveredSection ?? activeSection) : null;
-  const activeCitation = citedId ? (CITATIONS[citedId] ?? null) : null;
+  const citedId             = citationsOn ? (hoveredSection ?? activeSection) : null;
+  const citedContainerId    = citedId ? (CITATIONS[citedId] ?? null) : null;
+  const citedBlock          = citedContainerId ? PDF_BLOCKS.find(b => b.id === citedContainerId) ?? null : null;
 
   useEffect(() => {
-    if (!activeCitation) return;
-    const pg = activeCitation.page;
-    setCurrentPage(pg);
+    if (!citedContainerId || !citedBlock) return;
+    setCurrentPage(citedBlock.page);
     requestAnimationFrame(() => {
-      pageRefs.current[pg - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = containerRefs.current.get(citedContainerId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      else pageRefs.current[citedBlock.page - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCitation?.page, citedId]);
+  }, [citedContainerId]);
 
   /* ─── Loading animation ─────────────────────────────────────────── */
   function startLoading() {
@@ -774,26 +813,12 @@ export default function RunPage() {
                       <div key={pg}
                            ref={el => { pageRefs.current[pg - 1] = el; }}
                            className="w-full bg-white shadow-sm"
-                           style={{ position: "relative", padding: "52px 60px", minHeight: 680 }}>
-                        <PdfPageContent page={pg} highlight={citationsOn && runState === "done"} />
-                        {/* Citation highlight overlay */}
-                        {activeCitation && activeCitation.page === pg && (
-                          <div
-                            key={citedId}
-                            style={{
-                              position: "absolute",
-                              top: `${activeCitation.top}%`,
-                              left: `${activeCitation.left}%`,
-                              width: `${activeCitation.width}%`,
-                              height: `${activeCitation.height}%`,
-                              background: "rgba(37,99,235,0.1)",
-                              border: "2px solid rgba(37,99,235,0.45)",
-                              pointerEvents: "none",
-                              animation: "fadeIn 0.25s ease",
-                              borderRadius: 2,
-                            }}
-                          />
-                        )}
+                           style={{ padding: "52px 60px", minHeight: 680 }}>
+                        <PdfPageContent
+                          page={pg}
+                          activeContainerId={citedContainerId}
+                          registerContainer={(id, el) => containerRefs.current.set(id, el)}
+                        />
                       </div>
                     ))}
                   </div>
@@ -1309,102 +1334,192 @@ export default function RunPage() {
                     return (
                     <div className="flex flex-col gap-3 p-[10px]">
 
-                      {/* Image Description */}
-                      <div className="flex flex-col gap-0.5" {...citeProps("image-desc")}>
+                      {/* Newsletter Title */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("newsletter-title")}>
                         <div className="p-2">
-                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Image Description</p>
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Newsletter Title</p>
                         </div>
                         <div className="p-2">
                           <p className="text-[14px] text-[#525252] leading-5">
-                            This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green paper bag from Uber Eats placed on a concrete step in front of a dark door.
+                            DrylabNews — for investors &amp; friends · May 2017
                           </p>
                         </div>
                       </div>
 
-                      {/* The Delivery Bag */}
-                      <div className="flex flex-col gap-0.5" {...citeProps("delivery-bag")}>
+                      {/* Intro */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("intro")}>
                         <div className="p-2">
-                          <p className="text-[16px] font-semibold text-[#171717] leading-none">The Delivery Bag</p>
-                        </div>
-                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
-                          <p className="leading-5">A bright green paper bag with brown paper handles sits on the doorstep.</p>
-                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
-                            <li>Branding: The bag is prominently branded with the Uber Eats logo in a dark, sans-serif font. The word &quot;Uber&quot; is stacked on top of the word &quot;Eats&quot;.</li>
-                            <li>Contents: The bag is open, and several items are visible inside:</li>
-                            <li>A bouquet of fresh flowers, including red and yellow tulips.</li>
-                            <li>A pink rectangular box.</li>
-                            <li>A clear glass or bottle.</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* The Setting */}
-                      <div className="flex flex-col gap-0.5" {...citeProps("the-setting")}>
-                        <div className="p-2">
-                          <p className="text-[16px] font-semibold text-[#171717] leading-none">The Setting</p>
-                        </div>
-                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
-                          <p className="leading-5">The delivery is set in an outdoor entryway, surrounded by nature.</p>
-                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
-                            <li>Doorstep: The bag rests on a textured, light-colored concrete step.</li>
-                            <li>Door and Walls: Behind the bag is a dark, solid-colored door or wall. To the left and right are concrete walls.</li>
-                            <li>Foliage: The scene is framed with lush greenery. To the left, vines and small-leafed plants grow up the concrete wall. To the right of the door, there are more plants with long, thin, light-green leaves.</li>
-                            <li>Structure: On the far right, a wooden structure with vertical slats, possibly a fence or part of the house&apos;s exterior, is visible.</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* The Person */}
-                      <div className="flex flex-col gap-0.5" {...citeProps("the-person")}>
-                        <div className="p-2">
-                          <p className="text-[16px] font-semibold text-[#171717] leading-none">The Person</p>
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Issue Overview</p>
                         </div>
                         <div className="p-2">
                           <p className="text-[14px] text-[#525252] leading-5">
-                            In the bottom-right foreground, the back of a person&apos;s head and shoulder are partially visible. They have blonde or light-brown hair and are wearing a red or pink shirt. Their posture suggests they are looking down towards the delivery bag.
+                            First newsletter of 2017. Highlights: launch in the American market, sales growth, January investment round closed, mentor and team additions.
                           </p>
                         </div>
                       </div>
 
-                      {/* Image representation */}
-                      <div {...citeProps("the-image")} style={{
-                        ...(citeProps("the-image").style),
-                        width: "100%", aspectRatio: "3573/1049", position: "relative", overflow: "hidden",
-                        background: citationsOn && (hoveredSection === "the-image" || activeSection === "the-image")
-                          ? "#eff6ff"
-                          : "linear-gradient(135deg, #0d1a0d 0%, #1a2e1a 40%, #1c2b1c 60%, #0d190d 100%)",
-                      }}>
-                        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 80%, rgba(34,197,94,0.35) 0%, transparent 55%)" }} />
-                        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 70% 60%, rgba(21,128,61,0.25) 0%, transparent 50%)" }} />
-                        <div style={{ position: "absolute", bottom: "15%", left: "40%", transform: "translateX(-50%)", width: 32, height: 42,
-                          background: "rgba(34,197,94,0.75)", borderRadius: "3px 3px 4px 4px" }}>
-                          <div style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)",
-                            width: 20, height: 9, borderTop: "3px solid rgba(110,70,30,0.9)",
-                            borderLeft: "3px solid rgba(110,70,30,0.9)", borderRight: "3px solid rgba(110,70,30,0.9)",
-                            borderRadius: "6px 6px 0 0" }} />
-                          <div style={{ position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)",
-                            fontSize: 6, color: "rgba(255,255,255,0.8)", fontWeight: 700, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
-                            Uber<br/>Eats
-                          </div>
+                      {/* Capital Raised */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("capital-raised")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Capital Raised</p>
                         </div>
-                        <div style={{ position: "absolute", top: "30%", right: "20%", width: 28, height: 48,
-                          background: "rgba(239,68,68,0.55)", borderRadius: 2 }} />
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <p className="leading-5">Total new capital: <strong>5 MNOK</strong></p>
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Investment round: 2.13 MNOK</li>
+                            <li>Innovation Norway loan: 2.05 MNOK</li>
+                            <li>Filmlance International dev agreement</li>
+                            <li>Partly tied to milestone completion</li>
+                          </ul>
+                        </div>
                       </div>
 
-                      {/* Additional extracted fields */}
-                      <div className="flex flex-col gap-0.5">
+                      {/* New Owners */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("new-owners")}>
                         <div className="p-2">
-                          <p className="text-[14px] font-semibold text-[#171717] leading-none">Uber Technologies, Inc. Q1 2025 Earnings Supplemental Data</p>
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">New Owners</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <p className="leading-5">Welcomed to the Drylab family:</p>
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Unni Jacobsen, Torstein Jahr, Suzanne Bolstad, Eivind Bergene</li>
+                            <li>Turid Brun, Vigdis Trondsen, Lea Blindheim, Kristine Holmsen</li>
+                            <li>Torstein Hansen, Jostein Aanensen</li>
+                          </ul>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-0.5">
+
+                      {/* Meetings stat */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("meetings-stat")}>
                         <div className="p-2">
-                          <p className="text-[14px] font-semibold text-[#171717] leading-none">May 7, 2025</p>
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Meetings</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            <strong>34 meetings</strong> across NY, SF, LA and LV during the spring US tour.
+                          </p>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-0.5">
+
+                      {/* Partners list */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("partners-list")}>
                         <div className="p-2">
-                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Non-GAAP Financial Measures Disclosure</p>
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Partners &amp; Contacts</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            Notable contacts: Apple, Netflix, Amazon AWS, Google, IBM, Facebook, AMPAS, International Cinematographers Guild, Local 871, FilmLight, Pomfort, Radiant Images, Signiant, NBC, Team Downey.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Sales */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("sales")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Sales Performance</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Return customer rate: <strong>80%</strong></li>
+                            <li>Revenue Jan–Apr 2017: <strong>200 kNOK</strong> (vs 339 kNOK total in 2016)</li>
+                            <li>New markets: Canada (Film Factory Montreal), France (Lumiere Numeriques)</li>
+                            <li>Notable user: Gareth Unwin, producer of <em>The King&apos;s Speech</em></li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Team Updates */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("team-updates")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Team Updates</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>2 permanent developers in Łódź, Poland</li>
+                            <li>2 interns from U of Oslo&apos;s Entrepreneurship Program (market research)</li>
+                            <li>2 CS interns on machine learning &amp; Swift architectures</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* New Mentor */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("new-mentor")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">New Mentor</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            Caitlin Burns — accomplished NY producer, member of the Producers Guild of America. Joins Oscar-winning VFX supervisor Dave Stump.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* USA Tour */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("us-trip")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">USA Tour (Feb–Mar)</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <p className="leading-5">Pontus and Audun visited New York, St. Louis, San Francisco, Los Angeles. Key meetings:</p>
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Netflix</li>
+                            <li>Academy of Motion Picture Arts and Sciences</li>
+                            <li>International Cinematographers Guild</li>
+                            <li>Local 871 (script supervisors&apos; union)</li>
+                            <li>Apple</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* NAB */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("nab")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">NAB Convention (April)</p>
+                        </div>
+                        <div className="flex flex-col gap-[10px] p-2 text-[14px] text-[#525252]">
+                          <p className="leading-5">Andreas and Audun in Las Vegas, 100,000 attendees. Highlights:</p>
+                          <ul className="list-disc leading-5" style={{ paddingLeft: 21 }}>
+                            <li>Met PIX System (top competitor) — they regard the indie market as bigger than their own</li>
+                            <li>DIT-WIT party with leading DITs</li>
+                            <li>Camera integration talks: ARRI, Teradek/Paralinx</li>
+                            <li>Cloud talks: Amazon, Google, IBM</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* WWDC */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("wwdc")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">WWDC Invitation</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            Apple invited Drylab to WWDC in San Jose (June) — without applying.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Launch */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("launch-date")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Launch Date</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            <strong>Drylab 3.0</strong> launches at the International Broadcasters Convention in Amsterdam — <strong>September 2017</strong>. Development is ~1 month behind schedule.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* AGM */}
+                      <div className="flex flex-col gap-0.5" {...citeProps("agm")}>
+                        <div className="p-2">
+                          <p className="text-[16px] font-semibold text-[#171717] leading-none">Annual General Meeting</p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[14px] text-[#525252] leading-5">
+                            <strong>June 16, 2017</strong> at 15:00. Invitations sent to all owners.
+                          </p>
                         </div>
                       </div>
 
