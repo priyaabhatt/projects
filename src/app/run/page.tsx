@@ -468,6 +468,7 @@ export default function RunPage() {
   /* ── PDF viewer state ── */
   const totalPages = 3;
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageInputValue, setPageInputValue] = useState("1");
   const [zoomLevel, setZoomLevel]     = useState(100); // percent
   const ZOOM_STEP = 25;
   const ZOOM_MIN  = 25;
@@ -498,20 +499,24 @@ export default function RunPage() {
   const canRun  = hasFile && modelSelected !== "";
 
   /* ─── Page navigation ───────────────────────────────────────────── */
-  function prevPage() {
-    if (currentPage > 1) {
-      const target = currentPage - 1;
-      setCurrentPage(target);
-      pageRefs.current[target - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  function goToPage(target: number) {
+    const clamped = Math.max(1, Math.min(totalPages, target));
+    setCurrentPage(clamped);
+    setPageInputValue(String(clamped));
+    pageRefs.current[clamped - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return clamped;
   }
-  function nextPage() {
-    if (currentPage < totalPages) {
-      const target = currentPage + 1;
-      setCurrentPage(target);
-      pageRefs.current[target - 1]?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  function prevPage() { if (currentPage > 1)         goToPage(currentPage - 1); }
+  function nextPage() { if (currentPage < totalPages) goToPage(currentPage + 1); }
+  function commitPageInput() {
+    const n = parseInt(pageInputValue, 10);
+    if (Number.isNaN(n)) { setPageInputValue(String(currentPage)); return; }
+    goToPage(n);
   }
+
+  /* Keep the visible input in sync when the page changes from elsewhere
+     (citation auto-scroll, prev/next buttons, etc.) */
+  useEffect(() => { setPageInputValue(String(currentPage)); }, [currentPage]);
 
   /* ─── Zoom ──────────────────────────────────────────────────────── */
   function zoomIn()    { setZoomLevel(z => Math.min(ZOOM_MAX, z + ZOOM_STEP)); }
@@ -781,10 +786,21 @@ export default function RunPage() {
                         <Ic.ChevronLeft />
                       </button>
                     </Tooltip>
-                    <div className="flex items-center justify-center border bg-white text-[14px] font-medium text-[#0a0a0a] shrink-0"
-                         style={{ width: 42, height: 32, borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-                      {currentPage}
-                    </div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={pageInputValue}
+                      onChange={e => setPageInputValue(e.target.value.replace(/[^0-9]/g, ""))}
+                      onFocus={e => { e.currentTarget.select(); e.currentTarget.style.borderColor = "#2563eb"; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = "#e5e5e5"; commitPageInput(); }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter")  { commitPageInput(); (e.currentTarget as HTMLInputElement).blur(); }
+                        if (e.key === "Escape") { setPageInputValue(String(currentPage)); (e.currentTarget as HTMLInputElement).blur(); }
+                      }}
+                      aria-label="Go to page"
+                      className="text-center border bg-white text-[14px] font-medium text-[#0a0a0a] shrink-0 outline-none transition-colors"
+                      style={{ width: 42, height: 32, borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}
+                    />
                     <span className="px-2 text-[14px] font-medium text-[#737373]">of {totalPages}</span>
                     <Tooltip label="Next page" placement="bottom">
                       <button
