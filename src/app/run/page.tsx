@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 /* ─── Lucide-backed icon shim — every glyph at strokeWidth 1.5 ────── */
-const STROKE = 1.5;
+const STROKE = 2;
 const Ic = {
   Bell:         () => <Bell           size={16} strokeWidth={STROKE} />,
   ChevronRight: () => <ChevronRight   size={15} strokeWidth={STROKE} />,

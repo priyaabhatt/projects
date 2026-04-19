@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 /* ─── Lucide icons — every glyph at strokeWidth 1.5 ────────────────── */
-const STROKE = 1.5;
+const STROKE = 2;
 const IcPanelClose = () => <PanelLeftClose size={16} strokeWidth={STROKE} />;
 const IcPanelOpen  = () => <PanelLeftOpen  size={16} strokeWidth={STROKE} />;
 const IcInfo       = () => <Info           size={16} strokeWidth={STROKE} />;
