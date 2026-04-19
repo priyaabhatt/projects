@@ -545,7 +545,7 @@ export default function RunPage() {
     setProgress(0);
     setToastIdx(0);
 
-    const TOTAL_MS = 40_000;
+    const TOTAL_MS = 10_000;
     const start = performance.now();
 
     const tick = (now: number) => {
