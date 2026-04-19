@@ -3,153 +3,43 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode, CSSProperties } from "react";
 import Link from "next/link";
+import {
+  Bell, ChevronRight, MoveLeft, Play, ChevronLeft, ZoomIn, ZoomOut, Redo,
+  Upload, Plus, Code, Settings, SearchCheck, ChevronDown, Tag, Braces,
+  AlignJustify, Trash2, TableProperties, PenLine, Sparkles, GripVertical,
+  Copy, Download, Clock, WandSparkles, LoaderCircle, Check,
+} from "lucide-react";
 
-/* ─── Inline SVG icons (Lucide-style, 24-viewBox, 16px display, stroke 1.5) */
+/* ─── Lucide-backed icon shim — every glyph at strokeWidth 1.5 ────── */
+const STROKE = 1.5;
 const Ic = {
-  Bell: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-    </svg>
-  ),
-  ChevronRight: () => (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m9 18 6-6-6-6"/>
-    </svg>
-  ),
-  MoveLeft: () => (
-    /* Lucide MoveLeft — horizontal arrow with full-width line */
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 8L2 12L6 16"/><path d="M2 12H22"/>
-    </svg>
-  ),
-  Play: () => (
-    /* Stroked play — no fill */
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="5 3 19 12 5 21 5 3"/>
-    </svg>
-  ),
-  ChevronLeft: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m15 18-6-6 6-6"/>
-    </svg>
-  ),
-  ZoomIn: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/>
-    </svg>
-  ),
-  ZoomOut: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/>
-    </svg>
-  ),
-  Redo: () => (
-    /* Lucide Redo — used as zoom-reset in PDF toolbar */
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>
-    </svg>
-  ),
-  Upload: () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-    </svg>
-  ),
-  Plus: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-  ),
-  Code: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-    </svg>
-  ),
-  Settings: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
-    </svg>
-  ),
-  SearchCheck: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m8 11 2 2 4-4"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-    </svg>
-  ),
-  ChevronDown: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m6 9 6 6 6-6"/>
-    </svg>
-  ),
-  Tag: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/>
-    </svg>
-  ),
-  Braces: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/>
-    </svg>
-  ),
-  TextIcon: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/>
-    </svg>
-  ),
-  Trash: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6"/>
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-      <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
-    </svg>
-  ),
-  TableProp: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 3v18"/><rect width="18" height="18" x="3" y="3"/><path d="M3 9h18"/><path d="M3 15h12"/>
-    </svg>
-  ),
-  PenLine: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-    </svg>
-  ),
-  Sparkles: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
-    </svg>
-  ),
-  Grip: () => (
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/>
-      <circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/>
-      <circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/>
-    </svg>
-  ),
-  Copy: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="13" height="13" x="9" y="9" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-    </svg>
-  ),
-  Download: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
-  ),
-  TimerClock: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-    </svg>
-  ),
-  WandSparkles: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/>
-      <path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>
-    </svg>
-  ),
-  LoaderCircle: () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-         style={{ animation: "spin 1s linear infinite" }}>
-      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-    </svg>
-  ),
+  Bell:         () => <Bell           size={16} strokeWidth={STROKE} />,
+  ChevronRight: () => <ChevronRight   size={15} strokeWidth={STROKE} />,
+  MoveLeft:     () => <MoveLeft       size={16} strokeWidth={STROKE} />,
+  Play:         () => <Play           size={14} strokeWidth={STROKE} />,
+  ChevronLeft:  () => <ChevronLeft    size={16} strokeWidth={STROKE} />,
+  ZoomIn:       () => <ZoomIn         size={16} strokeWidth={STROKE} />,
+  ZoomOut:      () => <ZoomOut        size={16} strokeWidth={STROKE} />,
+  Redo:         () => <Redo           size={16} strokeWidth={STROKE} />,
+  Upload:       () => <Upload         size={24} strokeWidth={STROKE} />,
+  Plus:         () => <Plus           size={14} strokeWidth={STROKE} />,
+  Code:         () => <Code           size={14} strokeWidth={STROKE} />,
+  Settings:     () => <Settings       size={14} strokeWidth={STROKE} />,
+  SearchCheck:  () => <SearchCheck    size={14} strokeWidth={STROKE} />,
+  ChevronDown:  () => <ChevronDown    size={14} strokeWidth={STROKE} />,
+  Tag:          () => <Tag            size={13} strokeWidth={STROKE} />,
+  Braces:       () => <Braces         size={13} strokeWidth={STROKE} />,
+  TextIcon:     () => <AlignJustify   size={13} strokeWidth={STROKE} />,
+  Trash:        () => <Trash2         size={14} strokeWidth={STROKE} />,
+  TableProp:    () => <TableProperties size={14} strokeWidth={STROKE} />,
+  PenLine:      () => <PenLine        size={13} strokeWidth={STROKE} />,
+  Sparkles:     () => <Sparkles       size={13} strokeWidth={STROKE} />,
+  Grip:         () => <GripVertical   size={10} strokeWidth={STROKE} />,
+  Copy:         () => <Copy           size={14} strokeWidth={STROKE} />,
+  Download:     () => <Download       size={14} strokeWidth={STROKE} />,
+  TimerClock:   () => <Clock          size={13} strokeWidth={STROKE} />,
+  WandSparkles: () => <WandSparkles   size={13} strokeWidth={STROKE} />,
+  LoaderCircle: () => <LoaderCircle   size={13} strokeWidth={STROKE} style={{ animation: "spin 1s linear infinite" }} />,
 };
 
 /* ─── Tooltip wrapper ────────────────────────────────────────────── */
@@ -167,13 +57,6 @@ function Tooltip({ label, children, placement = "top" }: { label: string; childr
     </div>
   );
 }
-
-/* ─── Figma asset icon (16×16 container) ─────────────────────────── */
-const FigmaIcon = ({ src, size = 16 }: { src: string; size?: number }) => (
-  <div style={{ width: size, height: size, flexShrink: 0 }}>
-    <img src={src} width={size} height={size} alt="" style={{ display: "block", width: "100%", height: "100%" }} />
-  </div>
-);
 
 /* ─── Animated circular progress ─────────────────────────────────── */
 function CircularProgress({ percent }: { percent: number }) {
@@ -1632,7 +1515,7 @@ export default function RunPage() {
                       onMouseLeave={e => (e.currentTarget.style.background = "none")}>
                 {selected && (
                   <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <Check size={14} strokeWidth={STROKE} />
                   </span>
                 )}
                 {t}
@@ -1657,7 +1540,7 @@ export default function RunPage() {
                     onMouseLeave={e => (e.currentTarget.style.background = "none")}>
               {modelSelected === m && (
                 <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#0a0a0a" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <Check size={14} strokeWidth={STROKE} />
                 </span>
               )}
               {m}
@@ -1682,7 +1565,7 @@ export default function RunPage() {
                     onMouseLeave={e => (e.currentTarget.style.background = "none")}>
               {templateSelected === t && (
                 <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#0a0a0a" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <Check size={14} strokeWidth={STROKE} />
                 </span>
               )}
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t}</span>

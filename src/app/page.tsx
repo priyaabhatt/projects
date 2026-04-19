@@ -2,66 +2,23 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  PanelLeftClose, PanelLeftOpen, Info, LockOpen, Bell, Terminal, X,
+  ChevronRight, ArrowRight, Home, Activity, Settings, GitPullRequest,
+  Lock, Briefcase, FileBox, Navigation, Gamepad2,
+} from "lucide-react";
 
-/* ─── Inline SVG icons (only for things with no Figma asset) ─────── */
-const IcPanelClose = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="18" height="18" x="3" y="3" rx="0"/>
-    <path d="M9 3v18"/>
-    <path d="m14 9-3 3 3 3"/>
-  </svg>
-);
-const IcPanelOpen = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="18" height="18" x="3" y="3" rx="0"/>
-    <path d="M9 3v18"/>
-    <path d="m10 15 3-3-3-3"/>
-  </svg>
-);
-const IcInfo = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 16v-4"/><path d="M12 8h.01"/>
-  </svg>
-);
-const IcLockOpen = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="18" height="11" x="3" y="11" rx="0"/>
-    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
-  </svg>
-);
-const IcBell = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-  </svg>
-);
-const IcTerminal = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="4 17 10 11 4 5"/>
-    <line x1="12" x2="20" y1="19" y2="19"/>
-  </svg>
-);
-const IcX = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-  </svg>
-);
-const IcChevronR = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m9 18 6-6-6-6"/>
-  </svg>
-);
-const IcArrowR = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-  </svg>
-);
-
-/* ─── Figma asset icon wrapper ───────────────────────────────────── */
-const FigmaIcon = ({ src, size = 16 }: { src: string; size?: number }) => (
-  <img src={src} width={size} height={size} alt="" style={{ display: "block", flexShrink: 0 }} />
-);
+/* ─── Lucide icons — every glyph at strokeWidth 1.5 ────────────────── */
+const STROKE = 1.5;
+const IcPanelClose = () => <PanelLeftClose size={16} strokeWidth={STROKE} />;
+const IcPanelOpen  = () => <PanelLeftOpen  size={16} strokeWidth={STROKE} />;
+const IcInfo       = () => <Info           size={16} strokeWidth={STROKE} />;
+const IcLockOpen   = () => <LockOpen       size={16} strokeWidth={STROKE} />;
+const IcBell       = () => <Bell           size={16} strokeWidth={STROKE} />;
+const IcTerminal   = () => <Terminal       size={20} strokeWidth={STROKE} />;
+const IcX          = () => <X              size={16} strokeWidth={STROKE} />;
+const IcChevronR   = () => <ChevronRight   size={15} strokeWidth={STROKE} />;
+const IcArrowR     = () => <ArrowRight     size={16} strokeWidth={STROKE} />;
 
 /* ─── Tooltip wrapper for icon rail ─────────────────────────────── */
 const TooltipIcon = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -152,17 +109,17 @@ export default function PlaygroundPage() {
             <div className="flex flex-col gap-1 flex-1">
               <TooltipIcon label="Home">
                 <button className="flex items-center justify-center w-8 h-8 bg-blue-100">
-                  <FigmaIcon src="/assets/ic-home.svg" />
+                  <Home size={16} strokeWidth={STROKE} />
                 </button>
               </TooltipIcon>
               <TooltipIcon label="Analytics">
                 <button className="flex items-center justify-center w-8 h-8 text-[#737373] hover:bg-neutral-100 transition-colors">
-                  <FigmaIcon src="/assets/ic-activity.svg" />
+                  <Activity size={16} strokeWidth={STROKE} />
                 </button>
               </TooltipIcon>
               <TooltipIcon label="Settings">
                 <button className="flex items-center justify-center w-8 h-8 text-[#737373] hover:bg-neutral-100 transition-colors">
-                  <FigmaIcon src="/assets/ic-settings.svg" />
+                  <Settings size={16} strokeWidth={STROKE} />
                 </button>
               </TooltipIcon>
             </div>
@@ -179,24 +136,18 @@ export default function PlaygroundPage() {
               <div className="flex flex-col gap-0.5 px-2">
                 {/* Playground – active */}
                 <button className="flex items-center gap-2 h-8 px-2 w-full text-left bg-blue-100 text-blue-600 text-[14px] font-medium">
-                  {/* Lucide Gamepad — inline, rectangular controller */}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                    <rect x="2" y="6" width="20" height="12" rx="2"/>
-                    <path d="M6 12h4"/><path d="M8 10v4"/>
-                    <line x1="15" y1="12" x2="15.01" y2="12"/>
-                    <line x1="18" y1="12" x2="18.01" y2="12"/>
-                  </svg>
+                  <Gamepad2 size={16} strokeWidth={STROKE} style={{ flexShrink: 0 }} />
                   Playground
                 </button>
                 {/* Workflows – locked */}
                 <div className="relative group">
                   <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
                     <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                      <FigmaIcon src="/assets/ic-gitpr.svg" />
+                      <GitPullRequest size={16} strokeWidth={STROKE} />
                     </span>
                     <span className="flex-1 text-[#0a0a0a]">Workflows</span>
                     <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                      <FigmaIcon src="/assets/ic-lock.svg" />
+                      <Lock size={16} strokeWidth={STROKE} />
                     </span>
                   </button>
                   <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
@@ -207,11 +158,11 @@ export default function PlaygroundPage() {
                 <div className="relative group">
                   <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
                     <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                      <FigmaIcon src="/assets/ic-briefcase.svg" />
+                      <Briefcase size={16} strokeWidth={STROKE} />
                     </span>
                     <span className="flex-1 text-[#0a0a0a]">Jobs</span>
                     <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                      <FigmaIcon src="/assets/ic-lock.svg" />
+                      <Lock size={16} strokeWidth={STROKE} />
                     </span>
                   </button>
                   <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
@@ -309,7 +260,7 @@ export default function PlaygroundPage() {
             {/* Get started — action cards */}
             <div className="flex flex-col gap-4 p-4 shrink-0">
               <div className="flex items-center gap-2">
-                <FigmaIcon src="/assets/ic-navigation.svg" />
+                <Navigation size={16} strokeWidth={STROKE} />
                 <span className="text-[16px] font-medium text-[#0a0a0a]">Get started</span>
               </div>
 
@@ -326,7 +277,7 @@ export default function PlaygroundPage() {
                       <button disabled
                               className="flex items-center gap-1.5 px-1.5 py-1.5 border bg-white opacity-50 text-[14px] font-medium cursor-not-allowed"
                               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-                        <FigmaIcon src="/assets/ic-lock.svg" />
+                        <Lock size={16} strokeWidth={STROKE} />
                         <span>Try it</span>
                         <IcArrowR />
                       </button>
@@ -348,7 +299,7 @@ export default function PlaygroundPage() {
                   <div className="flex items-center gap-2 text-[16px] font-medium text-[#0a0a0a]">
                     {/* Exact FileBox icon from Figma */}
                     <span className="w-4 h-4 flex items-center justify-center">
-                      <FigmaIcon src="/assets/ic-filebox.svg" />
+                      <FileBox size={16} strokeWidth={STROKE} />
                     </span>
                     Try a template
                   </div>
