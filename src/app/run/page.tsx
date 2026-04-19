@@ -1163,7 +1163,7 @@ export default function RunPage() {
                             /* ── Editing row ── */
                             <>
                               {/* Name */}
-                              <div className="flex-1 px-2 py-1.5" style={{ borderRight: "1px solid #e5e5e5" }}>
+                              <div className="flex-1 px-2 py-1.5">
                                 <input
                                   autoFocus
                                   type="text"
@@ -1178,7 +1178,7 @@ export default function RunPage() {
                                 />
                               </div>
                               {/* Type — portal dropdown */}
-                              <div className="flex-1 px-2 py-1.5" style={{ borderRight: "1px solid #e5e5e5" }}>
+                              <div className="flex-1 px-2 py-1.5">
                                 <button
                                   ref={el => { if (el) typeTriggerRefs.current.set(row.id, el); else typeTriggerRefs.current.delete(row.id); }}
                                   onClick={e => {
