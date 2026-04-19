@@ -179,41 +179,49 @@ const FigmaIcon = ({ src, size = 16 }: { src: string; size?: number }) => (
 function CircularProgress({ percent }: { percent: number }) {
   const r = 22;
   const circ = 2 * Math.PI * r;
+  const len  = (circ * percent) / 100;
+  const angleRad = (-90 + (percent / 100) * 360) * (Math.PI / 180);
+  const dotX = 28 + r * Math.cos(angleRad);
+  const dotY = 28 + r * Math.sin(angleRad);
   return (
     <div className="relative flex items-center justify-center" style={{ width: 56, height: 56 }}>
       <svg width="56" height="56" viewBox="0 0 56 56" style={{ position: "absolute", inset: 0 }}>
         <circle cx="28" cy="28" r={r} stroke="#e5e5e5" strokeWidth="4" fill="none"/>
         <circle cx="28" cy="28" r={r} stroke="#2563eb" strokeWidth="4" fill="none"
           strokeLinecap="round"
-          strokeDasharray={`${circ * percent / 100} ${circ}`}
+          strokeDasharray={`${len} ${circ}`}
           transform="rotate(-90 28 28)"
-          style={{ transition: "stroke-dasharray 0.3s ease" }}
         />
+        <circle cx={dotX} cy={dotY} r="2.5" fill="#2563eb"/>
       </svg>
-      <span className="text-[12px] font-medium text-[#171717] z-10 leading-none">{Math.round(percent)}%</span>
+      <span className="text-[12px] font-medium text-[#171717] z-10 leading-none">{Math.floor(percent)}%</span>
     </div>
   );
 }
 
-/* ─── Toast facts shown during loading (cycle every 3 s) ──────────── */
+/* ─── Toast facts shown during loading (rotates every 5 s) ────────── */
 const toastMessages = [
   "Morgan Stanley research PDFs average 48 pages — Unsiloed processes them in under 15 seconds.",
-  "Structured extraction preserves citation context that plain copy-paste loses.",
-  "Alpha model achieves 94%+ field accuracy on dense financial tables.",
-  "Unsiloed detects nested headers and multi-column layouts automatically.",
-  "Each extracted field includes a confidence score and source page reference.",
+  "Unsiloed preserves table structure with 99.2% accuracy across complex financial documents.",
+  "Charts, footnotes, and multi-column layouts are extracted without losing context.",
+  "Every figure is traceable back to its source page and coordinates.",
+  "Unsiloed handles scanned PDFs with OCR automatically — no preprocessing needed.",
+  "Named entities, tickers, and financial metrics are tagged and structured as you read this.",
+  "Output is queryable JSON — ready to drop into your pipeline, RAG, or analytics stack.",
+  "Processing is cancellation-safe and resumable if the session drops.",
 ];
 
-/* ─── Loading status messages that cycle ─────────────────────────── */
-const statusMessages = [
-  "Initializing standard extraction",
-  "Detecting document structure",
-  "Parsing page layouts",
-  "Identifying field boundaries",
-  "Extracting schema fields",
-  "Validating extracted data",
-  "Finalizing results",
-];
+/* ─── Status label derived from progress percent ──────────────────── */
+function statusForPercent(p: number): string {
+  if (p >= 100) return "Extraction complete";
+  if (p >= 86)  return "Finalizing extraction";
+  if (p >= 71)  return "Cross-referencing entities";
+  if (p >= 56)  return "Analyzing financial data";
+  if (p >= 41)  return "Identifying tables and figures";
+  if (p >= 26)  return "Extracting text blocks";
+  if (p >= 13)  return "Parsing document structure";
+  return "Initializing standard extraction";
+}
 
 type SchemaRow = { id: number; name: string; type: string; desc: string; editing: boolean };
 
@@ -470,14 +478,10 @@ export default function RunPage() {
   const containerRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
 
   /* ── Loading animation state ── */
-  const [progress, setProgress]         = useState(0);
-  const [dotCount, setDotCount]         = useState(1);
-  const [statusIdx, setStatusIdx]       = useState(0);
-  const [toastIdx, setToastIdx]         = useState(0);
-  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const dotRef      = useRef<ReturnType<typeof setInterval> | null>(null);
-  const toastRef    = useRef<ReturnType<typeof setInterval> | null>(null);
-  const statusRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [toastIdx, setToastIdx] = useState(0);
+  const rafRef   = useRef<number | null>(null);
+  const toastRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* ── Resizable panel state ── */
   const containerRef = useRef<HTMLDivElement>(null);
@@ -533,48 +537,44 @@ export default function RunPage() {
   /* ─── Loading animation ─────────────────────────────────────────── */
   function startLoading() {
     if (!canRun) return;
-    [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) { clearInterval(r.current); r.current = null; } });
+    if (rafRef.current   !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    if (toastRef.current !== null) { clearInterval(toastRef.current);      toastRef.current = null; }
 
     setActiveTab("result");
     setRunState("loading");
     setProgress(0);
-    setStatusIdx(0);
     setToastIdx(0);
-    setDotCount(1);
 
-    const TOTAL_MS = 10_000;
-    const STEP_MS  = 100;
+    const TOTAL_MS = 40_000;
     const start = performance.now();
 
-    progressRef.current = setInterval(() => {
-      const elapsed = performance.now() - start;
+    const tick = (now: number) => {
+      const elapsed = now - start;
       const pct = Math.min(100, (elapsed / TOTAL_MS) * 100);
       setProgress(pct);
-      if (elapsed >= TOTAL_MS) {
-        if (progressRef.current) { clearInterval(progressRef.current); progressRef.current = null; }
-        setProgress(100);
-        setRunState("done");
+      if (pct < 100) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+        setTimeout(() => setRunState("done"), 600);
       }
-    }, STEP_MS);
-
-    statusRef.current = setInterval(() => {
-      setStatusIdx(i => Math.min(statusMessages.length - 1, i + 1));
-    }, Math.floor(TOTAL_MS / statusMessages.length));
+    };
+    rafRef.current = requestAnimationFrame(tick);
 
     toastRef.current = setInterval(() => {
       setToastIdx(i => (i + 1) % toastMessages.length);
-    }, 3300);
-
-    dotRef.current = setInterval(() => {
-      setDotCount(c => (c % 3) + 1);
-    }, 400);
+    }, 5000);
   }
 
   useEffect(() => {
     if (runState !== "loading") {
-      [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); });
+      if (rafRef.current   !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+      if (toastRef.current !== null) { clearInterval(toastRef.current);      toastRef.current = null; }
     }
-    return () => { [progressRef, dotRef, toastRef, statusRef].forEach(r => { if (r.current) clearInterval(r.current); }); };
+    return () => {
+      if (rafRef.current   !== null) cancelAnimationFrame(rafRef.current);
+      if (toastRef.current !== null) clearInterval(toastRef.current);
+    };
   }, [runState]);
 
   /* ─── Resizable drag ────────────────────────────────────────────── */
@@ -1057,20 +1057,21 @@ export default function RunPage() {
                   <div className="flex flex-col items-center gap-2">
                     <CircularProgress percent={progress} />
                     <span className="text-[14px] font-medium text-[#737373]">
-                      {statusMessages[statusIdx]}{".".repeat(dotCount)}
+                      {statusForPercent(progress)}
+                      {progress < 100 && <span className="loading-dots" aria-hidden="true" />}
                     </span>
                   </div>
 
-                  {/* Fact toast card */}
+                  {/* Fact toast card — fixed min-height to prevent jitter on shorter facts */}
                   <div className="flex items-start gap-2 p-4 bg-white border"
-                       style={{ width: 356, borderColor: "#e5e5e5", boxShadow: "0px 4px 12px 0px rgba(0,0,0,0.1)" }}>
+                       style={{ width: 356, minHeight: 92, borderColor: "#e5e5e5", boxShadow: "0px 4px 12px 0px rgba(0,0,0,0.1)" }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
                       <circle cx="12" cy="12" r="10" fill="#0a0a0a"/>
                       <path d="M12 16v-4" stroke="white" strokeWidth="1.5"/>
                       <path d="M12 8h.01" stroke="white" strokeWidth="2"/>
                     </svg>
                     <p key={toastIdx} className="text-[14px] font-medium text-[#0a0a0a] leading-5 flex-1 min-w-0"
-                       style={{ animation: "fadeIn 0.4s ease" }}>
+                       style={{ animation: "factCrossfade 400ms ease" }}>
                       {toastMessages[toastIdx]}
                     </p>
                   </div>
@@ -1683,6 +1684,25 @@ export default function RunPage() {
         @keyframes toastFadeOut   { from { opacity: 1; } to { opacity: 0; } }
         @keyframes spin           { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes shimmerText    { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+        @keyframes factCrossfade  { 0% { opacity: 0; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
+        /* Animated trailing dots — reserves width so the label never reflows. */
+        .loading-dots {
+          display: inline-block;
+          width: 1.5ch;
+          text-align: left;
+          vertical-align: bottom;
+        }
+        .loading-dots::after {
+          content: '';
+          animation: loadingDots 1.6s infinite;
+        }
+        @keyframes loadingDots {
+          0%,  24.99% { content: ''; }
+          25%, 49.99% { content: '.'; }
+          50%, 74.99% { content: '..'; }
+          75%, 100%   { content: '...'; }
+        }
       `}</style>
     </div>
   );
