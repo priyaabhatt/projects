@@ -905,8 +905,7 @@ export default function RunPage() {
                 {/* Right controls */}
                 <div className="flex items-center gap-1">
                   {/* Source highlighting toggle */}
-                  <div className="flex items-center gap-2 mr-1">
-                    <span className="text-[12px] text-[#737373] whitespace-nowrap">Source highlighting</span>
+                  <div className="flex items-center gap-3 mr-1">
                     <button
                       onClick={() => setCitationsOn(v => { if (v) { setActiveSection(null); setHoveredSection(null); } return !v; })}
                       className="flex items-center px-0.5 shrink-0 transition-colors"
@@ -919,6 +918,7 @@ export default function RunPage() {
                         boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                       }} />
                     </button>
+                    <span className="text-[14px] font-medium text-[#0a0a0a] leading-none whitespace-nowrap">Source highlighting</span>
                   </div>
 
                   {/* Copy */}
@@ -1104,8 +1104,8 @@ export default function RunPage() {
                                   placeholder="Field name"
                                   className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
                                   style={{ borderColor: "#e5e5e5" }}
-                                  onFocus={e => (e.currentTarget.style.borderColor = "#2563eb")}
-                                  onBlur={e => (e.currentTarget.style.borderColor = "#e5e5e5")}
+                                  onFocus={e => { e.currentTarget.style.borderColor = "#a3a3a3"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(163,163,163,0.3)"; }}
+                                  onBlur={e => { e.currentTarget.style.borderColor = "#e5e5e5"; e.currentTarget.style.boxShadow = ""; }}
                                 />
                               </div>
                               {/* Type — portal dropdown */}
@@ -1118,7 +1118,10 @@ export default function RunPage() {
                                     setTypeDropState({ rowId: row.id, top: r.bottom + 2, left: r.left, width: r.width });
                                   }}
                                   className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] text-left flex items-center justify-between gap-2 outline-none cursor-pointer hover:bg-[#fafafa] transition-colors"
-                                  style={{ borderColor: typeDropState?.rowId === row.id ? "#2563eb" : "#e5e5e5" }}>
+                                  style={{
+                                    borderColor: typeDropState?.rowId === row.id ? "#a3a3a3" : "#e5e5e5",
+                                    boxShadow: typeDropState?.rowId === row.id ? "0 0 0 3px rgba(163,163,163,0.3)" : undefined,
+                                  }}>
                                   <span>{row.type}</span>
                                   <span className="shrink-0 text-[#737373]"><Ic.ChevronDown /></span>
                                 </button>
@@ -1133,8 +1136,8 @@ export default function RunPage() {
                                   placeholder="Description"
                                   className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
                                   style={{ borderColor: "#e5e5e5" }}
-                                  onFocus={e => (e.currentTarget.style.borderColor = "#2563eb")}
-                                  onBlur={e => (e.currentTarget.style.borderColor = "#e5e5e5")}
+                                  onFocus={e => { e.currentTarget.style.borderColor = "#a3a3a3"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(163,163,163,0.3)"; }}
+                                  onBlur={e => { e.currentTarget.style.borderColor = "#e5e5e5"; e.currentTarget.style.boxShadow = ""; }}
                                 />
                               </div>
                             </>
