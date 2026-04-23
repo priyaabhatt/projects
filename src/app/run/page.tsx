@@ -524,6 +524,7 @@ export default function RunPage() {
   /* ── Schema rows state ── */
   const [schemaRows, setSchemaRows] = useState<SchemaRow[]>([]);
   const nextIdRef = useRef(3);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
 
   /* ─── Derived ─────────────────────────────────────── */
   const hasFile = fileUploaded || urlInput.trim().length > 4;
@@ -569,6 +570,23 @@ export default function RunPage() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [citedContainerId]);
+
+  /* ─── Run click: validate schema rows before kicking off loading ── */
+  function handleRun() {
+    if (schemaTab === "manual" && schemaRows.some(r => r.name.trim() === "")) {
+      setSchemaError("Please fill in a name for every schema field before running.");
+      return;
+    }
+    setSchemaError(null);
+    startLoading();
+  }
+
+  /* ─── Auto-clear schema error once every row has a name ─────────── */
+  useEffect(() => {
+    if (schemaError && schemaRows.every(r => r.name.trim() !== "")) {
+      setSchemaError(null);
+    }
+  }, [schemaRows, schemaError]);
 
   /* ─── Loading animation ─────────────────────────────────────────── */
   function startLoading() {
@@ -1014,7 +1032,7 @@ export default function RunPage() {
                 </button>
                 <Tooltip label={!canRun ? "Upload a file and select a model first." : "Run Parse"} placement="bottom">
                   <button
-                    onClick={startLoading}
+                    onClick={handleRun}
                     disabled={!canRun || runState === "loading"}
                     className="flex items-center gap-1.5 px-2 py-1.5 text-[12px] font-medium transition-all"
                     style={canRun && runState !== "loading" ? {
@@ -1287,7 +1305,9 @@ export default function RunPage() {
                             <>
                               <div className="flex-1 px-2 py-1.5 cursor-text group/name"                                   onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/name:border-[#e5e5e5] flex items-center px-2 transition-colors">
-                                  <span className="text-[14px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
+                                  {row.name
+                                    ? <span className="text-[14px] font-medium text-[#0a0a0a] truncate">{row.name}</span>
+                                    : <span className="text-[14px] text-[#a1a1aa] truncate">Field name</span>}
                                 </div>
                               </div>
                               <div className="flex-1 px-2 py-1.5 cursor-pointer group/type"                                   onClick={() => updateRow(row.id, "editing", true)}>
@@ -1299,7 +1319,9 @@ export default function RunPage() {
                               <div className="flex-1 px-2 py-1.5 cursor-text group/desc"
                                    onClick={() => updateRow(row.id, "editing", true)}>
                                 <div className="w-full h-8 border border-transparent group-hover/desc:border-[#e5e5e5] flex items-center px-2 transition-colors">
-                                  <span className="text-[14px] text-[#0a0a0a] truncate">{row.desc || <span className="text-[#a1a1aa]">—</span>}</span>
+                                  {row.desc
+                                    ? <span className="text-[14px] text-[#0a0a0a] truncate">{row.desc}</span>
+                                    : <span className="text-[14px] text-[#a1a1aa] truncate">Describe this field</span>}
                                 </div>
                               </div>
                             </>
@@ -1321,6 +1343,13 @@ export default function RunPage() {
                         </button>
                       </div>
                     </div>
+
+                    {schemaError && (
+                      <div className="flex items-start gap-2 text-[13px] text-[#dc2626] mt-2">
+                        <span aria-hidden>!</span>
+                        <span>{schemaError}</span>
+                      </div>
+                    )}
                   </>
                 ) : (
                   /* ── Auto-Suggest tab ── */
