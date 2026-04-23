@@ -1195,8 +1195,7 @@ export default function RunPage() {
                           <div className="flex flex-col gap-1 flex-1 min-w-0">
                             <label className="text-[14px] font-medium text-[#737373]">Name</label>
                             <input type="text" placeholder="e.g. Invoice processing"
-                                   className="h-9 border bg-white px-3 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa]"
-                                   style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }} />
+                                   className="h-9 border border-[#e5e5e5] bg-white px-3 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-colors focus:border-[#a3a3a3] focus:shadow-[0_0_0_3px_rgba(163,163,163,0.3)]" />
                           </div>
                           <div className="flex flex-col gap-1 flex-1 min-w-0">
                             <label className="text-[14px] font-medium text-[#737373]">Template</label>
