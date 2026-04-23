@@ -167,6 +167,154 @@ Drylab 3.0 launches at IBC Amsterdam — September 2017.
 June 16, 2017 at 15:00.
 `;
 
+/* ─── Markdown result tab content ────────────────────────────────── */
+const MARKDOWN_LINES: string[] = [
+  "# Parser Results",
+  "",
+  "**Strategy:** parse",
+  "**Total Chunks:** 12",
+  "**Average Chunk Size:** 387 characters",
+  "",
+  "---",
+  "",
+  "## Chunk 1",
+  "",
+  "### Image Description",
+  "",
+  "This is a wide-angle, over-the-shoulder photograph depicting a home delivery. The central focus is a green paper bag from Uber Eats placed on a concrete step in front of a dark door.",
+  "",
+  "#### The Delivery Bag",
+  "A bright green paper bag with brown paper handles sits on the doorstep.",
+  "* **Branding:** The bag is prominently branded with the **Uber Eats** logo in a dark, sans-serif font.",
+  "* **Contents:** The bag is open, and several items are visible inside:",
+  "* A bouquet of fresh flowers, including red and yellow tulips.",
+  "* A pink rectangular box.",
+  "* A clear glass or bottle.",
+  "",
+  "#### The Setting",
+  "The delivery is set in an outdoor entryway, surrounded by nature.",
+  "* **Doorstep:** The bag rests on a textured, light-colored concrete step.",
+  "* **Foliage:** The scene is framed with lush greenery on both sides of the door.",
+  "",
+  "### Overall Impression",
+  "The image conveys a sense of convenience and modern life, highlighting the ease of home delivery services.",
+  "",
+  "---",
+  "",
+  "## Chunk 2",
+  "",
+  "### Image Description",
+  "",
+  "This image shows a close-up of a smartphone screen displaying a delivery tracking interface.",
+  "",
+  "#### Key Elements",
+  "* **Map Display:** The upper portion shows a street map with a blue route line.",
+  "* **Status Bar:** Shows \"Arriving in 5 minutes\" with a green indicator.",
+  "* **Driver Info:** Profile picture and name \"Sarah M.\" with a 4.9 star rating.",
+  "",
+];
+
+/* ─── JSON result tab content ────────────────────────────────────── */
+const JSON_LINES: string[] = [
+  `{`,
+  `  "id": "72bc8640-50ab-4aa4-940f-f9a49ab2cbd5",`,
+  `  "task_id": "240926e8-fbbc-4a20-ab88-501dc9f7adbb",`,
+  `  "job_id": null,`,
+  `  "strategy": "parse",`,
+  `  "status": "completed",`,
+  `  "file_name": "Uber-Q1-25-Earnings-Supplemental-Data.pdf",`,
+  `  "file_type": "application/pdf",`,
+  `  "chunk_size": null,`,
+  `  "overlap": null,`,
+  `  "total_chunks": 12,`,
+  `  "created_at": "2025-10-31T21:38:40.235421+00:00",`,
+  `  "started_at": "2025-10-31T21:38:40.235439+00:00",`,
+  `  "finished_at": "2025-10-31T21:39:58.256682+00:00",`,
+  `  "error": null,`,
+  `  "user_id": "05891f42e-0684-434c-999a-beedcf34c84a",`,
+  `  "org_id": null,`,
+  `  "file_url": "https://platform-unsiloed-ai.s3.us-east-1.amazonaws.com/batches/a65c0208.pdf",`,
+  `  "access_result": "private",`,
+  `  "credit_used": 12,`,
+  `  "result": {`,
+  `    "chunks": [`,
+  `      {`,
+  `        "segments": [`,
+  `          {`,
+  `            "segment_type": "Picture",`,
+  `            "content": "",`,
+  `            "image": "https://s3.us-east-1.amazonaws.com/chunker-bucket/images/8cdf4ab3.png",`,
+  `            "page_number": 1,`,
+  `            "segment_id": "8cdf4ab3-d29b-4829-a485-c6380053867",`,
+  `            "confidence": 0.9083394,`,
+  `            "page_width": 3840,`,
+  `            "page_height": 2160,`,
+  `            "bbox": {`,
+  `              "x": 0,`,
+  `              "y": 0,`,
+  `              "width": 3840,`,
+  `              "height": 2160`,
+  `            }`,
+  `          }`,
+  `        ]`,
+  `      }`,
+  `    ]`,
+  `  }`,
+  `}`,
+];
+
+const MD_COLORS   = { h1: "#dc2626", h2: "#ea580c", h3: "#f97316", h4: "#ca8a04", bold: "#2563eb", bullet: "#16a34a", rule: "#e5e5e5", text: "#171717" };
+const JSON_COLORS = { brace: "#0284c7", key: "#dc2626", string: "#2563eb", number: "#9333ea", text: "#171717" };
+const MONO_STACK  = '"Geist Mono", ui-monospace, "SF Mono", Menlo, monospace';
+
+function renderMarkdownLine(line: string): ReactNode {
+  if (line === "")                 return " ";
+  if (line.trim() === "---")       return <span style={{ color: MD_COLORS.rule }}>{line}</span>;
+  if (line.startsWith("#### "))    return <span style={{ color: MD_COLORS.h4 }}>{line}</span>;
+  if (line.startsWith("### "))     return <span style={{ color: MD_COLORS.h3 }}>{line}</span>;
+  if (line.startsWith("## "))      return <span style={{ color: MD_COLORS.h2 }}>{line}</span>;
+  if (line.startsWith("# "))       return <span style={{ color: MD_COLORS.h1 }}>{line}</span>;
+
+  let body = line;
+  let bullet: ReactNode = null;
+  const m = line.match(/^(\*\s)(.*)$/);
+  if (m) { bullet = <span style={{ color: MD_COLORS.bullet }}>{m[1]}</span>; body = m[2]; }
+
+  const parts = body.split(/(\*\*[^*]+\*\*)/);
+  return (
+    <>
+      {bullet}
+      {parts.map((p, i) =>
+        p.startsWith("**") && p.endsWith("**")
+          ? <span key={i} style={{ color: MD_COLORS.bold }}>{p}</span>
+          : <span key={i} style={{ color: MD_COLORS.text }}>{p}</span>
+      )}
+    </>
+  );
+}
+
+function renderJsonLine(line: string): ReactNode {
+  if (line === "") return " ";
+  const out: ReactNode[] = [];
+  const re = /"(?:\\.|[^"\\])*"|true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}\[\]]|[^"{}\[\]\s,:]+|[\s,:]+/g;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(line)) !== null) {
+    const tok = m[0];
+    let color: string = JSON_COLORS.text;
+    if (tok[0] === '"') {
+      const after = line.slice(m.index + tok.length);
+      color = /^\s*:/.test(after) ? JSON_COLORS.key : JSON_COLORS.string;
+    } else if (tok === "null" || tok === "true" || tok === "false" || /^-?\d/.test(tok)) {
+      color = JSON_COLORS.number;
+    } else if (tok === "{" || tok === "}" || tok === "[" || tok === "]") {
+      color = JSON_COLORS.brace;
+    }
+    out.push(<span key={i++} style={{ color }}>{tok}</span>);
+  }
+  return <>{out}</>;
+}
+
 /* ─── Drylab newsletter (PrinceXML sample) — paragraph blocks ────── */
 type PdfBlock = {
   id: string;
@@ -1456,14 +1604,24 @@ export default function RunPage() {
                   })()}
 
                   {resultTab === "markdown" && (
-                    <div className="flex items-center justify-center py-20 text-[14px] text-[#a1a1aa]">
-                      Markdown view — coming in next update
+                    <div className="p-4" style={{ fontFamily: MONO_STACK }}>
+                      {MARKDOWN_LINES.map((line, idx) => (
+                        <div key={idx} className="flex items-start text-[14px] leading-[20px] min-h-[20px] whitespace-pre-wrap">
+                          <span className="w-10 pr-[10px] shrink-0 text-right text-[#737373] select-none">{idx + 1}</span>
+                          <span className="flex-1">{renderMarkdownLine(line)}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
 
                   {resultTab === "json" && (
-                    <div className="flex items-center justify-center py-20 text-[14px] text-[#a1a1aa]">
-                      JSON view — coming in next update
+                    <div className="p-4" style={{ fontFamily: MONO_STACK }}>
+                      {JSON_LINES.map((line, idx) => (
+                        <div key={idx} className="flex items-start text-[14px] leading-[20px] min-h-[20px] whitespace-pre-wrap">
+                          <span className="w-10 pr-[10px] shrink-0 text-right text-[#737373] select-none">{idx + 1}</span>
+                          <span className="flex-1">{renderJsonLine(line)}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
