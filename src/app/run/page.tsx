@@ -1102,10 +1102,7 @@ export default function RunPage() {
                                   onChange={e => updateRow(row.id, "name", e.target.value)}
                                   onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
                                   placeholder="Field name"
-                                  className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
-                                  style={{ borderColor: "#e5e5e5" }}
-                                  onFocus={e => { e.currentTarget.style.borderColor = "#a3a3a3"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(163,163,163,0.3)"; }}
-                                  onBlur={e => { e.currentTarget.style.borderColor = "#e5e5e5"; e.currentTarget.style.boxShadow = ""; }}
+                                  className="w-full h-8 border border-[#e5e5e5] bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors focus:border-[#a3a3a3] focus:shadow-[0_0_0_3px_rgba(163,163,163,0.3)]"
                                 />
                               </div>
                               {/* Type — portal dropdown */}
@@ -1134,10 +1131,7 @@ export default function RunPage() {
                                   onChange={e => updateRow(row.id, "desc", e.target.value)}
                                   onKeyDown={e => e.key === "Enter" && commitRow(row.id)}
                                   placeholder="Description"
-                                  className="w-full h-8 border bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors"
-                                  style={{ borderColor: "#e5e5e5" }}
-                                  onFocus={e => { e.currentTarget.style.borderColor = "#a3a3a3"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(163,163,163,0.3)"; }}
-                                  onBlur={e => { e.currentTarget.style.borderColor = "#e5e5e5"; e.currentTarget.style.boxShadow = ""; }}
+                                  className="w-full h-8 border border-[#e5e5e5] bg-white px-2 text-[14px] text-[#0a0a0a] outline-none placeholder:text-[#a1a1aa] transition-colors focus:border-[#a3a3a3] focus:shadow-[0_0_0_3px_rgba(163,163,163,0.3)]"
                                 />
                               </div>
                             </>
