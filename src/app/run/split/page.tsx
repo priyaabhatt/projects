@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -93,16 +94,93 @@ function LabeledSwitch({ label, title, defaultOn = false }: { label: string; tit
   );
 }
 
-function DropdownField({ label, value, desc, optional }: { label: string; value: string; desc?: string; optional?: boolean }) {
+function DropdownField({
+  label, value, options, desc, optional,
+}: {
+  label: string;
+  value: string;
+  options?: string[];
+  desc?: string;
+  optional?: boolean;
+}) {
+  const [selected, setSelected] = useState(value);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+  const [mounted, setMounted] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  function toggle() {
+    if (!options) return;
+    const r = triggerRef.current?.getBoundingClientRect();
+    if (r) setPos({ top: r.bottom + 2, left: r.left, width: r.width });
+    setOpen(v => !v);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function onMouseDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (!triggerRef.current?.contains(t) && !menuRef.current?.contains(t)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [open]);
+
   return (
     <div className="flex flex-col gap-1 w-full">
       <FieldLabel label={label} optional={optional} />
-      <div className="flex items-center gap-2 h-9 px-3 py-1 border bg-white text-[14px] text-[#0a0a0a]"
-           style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-        <span className="flex-1 truncate">{value}</span>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={toggle}
+        className="flex items-center gap-2 h-9 px-3 py-1 border bg-white text-[14px] text-[#0a0a0a] text-left outline-none hover:bg-[#fafafa] transition-colors"
+        style={{
+          borderColor: open ? "#a3a3a3" : "#e5e5e5",
+          boxShadow: open ? "0 0 0 3px rgba(163,163,163,0.3)" : "0 1px 2px 0 rgba(0,0,0,0.05)",
+          cursor: options ? "pointer" : "default",
+        }}
+      >
+        <span className="flex-1 truncate">{selected}</span>
         <ChevronDown size={14} strokeWidth={STROKE} className="text-[#737373]" />
-      </div>
+      </button>
       {desc && <p className="text-[14px] text-[#737373] leading-5">{desc}</p>}
+      {mounted && open && options && createPortal(
+        <div
+          ref={menuRef}
+          style={{
+            position: "fixed", zIndex: 9999,
+            top: pos.top, left: pos.left, width: pos.width,
+            background: "white", border: "1px solid #e5e5e5", padding: "4px 0",
+            boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)",
+          }}
+        >
+          {options.map(opt => {
+            const isSelected = opt === selected;
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => { setSelected(opt); setOpen(false); }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center",
+                  paddingLeft: 12, paddingRight: 12, paddingTop: 8, paddingBottom: 8,
+                  fontSize: 14, color: "#0a0a0a", textAlign: "left",
+                  background: isSelected ? "#f5f5f5" : "transparent",
+                  border: "none", cursor: "pointer",
+                }}
+                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "#f5f5f5"; }}
+                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+              >
+                {opt}
+              </button>
+            );
+          })}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
@@ -297,12 +375,16 @@ function ConfigSidebar() {
                            title="Others"
                            desc="Configure OCR, content filtering, and layout detection for this parse run.">
                     <DropdownField label="Content Filter" value="All Content Types"
+                                   options={["All Content Types", "Tables Only", "Pictures Only", "Tables & Pictures", "Tables & Formulas", "Pictures & Formulas"]}
                                    desc="Choose which types of content to include in the parsed output" />
                     <DropdownField label="OCR Strategy" value="Process All Content"
+                                   options={["Automatic Detection", "Process All Content"]}
                                    desc="Choose whether OCR runs automatically on detected images or processes all content" />
                     <DropdownField label="Layout Analysis" value="Smart Layout Detection"
+                                   options={["Smart Layout Detection", "Page-by-Page Processing", "Advanced Layout Detection"]}
                                    desc="How the system analyzes and segments document structure" />
                     <DropdownField label="OCR Engine" value="UnsiloedHawk"
+                                   options={["UnsiloedStorm", "UnsiloedHawk", "UnsiloedBeta"]}
                                    desc="Select the optimal character recognition engine for fast extraction" />
                   </Section>
                 </>
@@ -318,9 +400,12 @@ function ConfigSidebar() {
                   <Section icon={<Cpu size={16} strokeWidth={STROKE} />}
                            title="VLM Model Selection"
                            desc="Choose the VLM model for each content type in this parse run.">
-                    <DropdownField label="Table Processing" value="Astra" />
-                    <DropdownField label="Picture Processing" value="Nova" />
-                    <DropdownField label="Formula Processing" value="Nova" />
+                    <DropdownField label="Table Processing" value="Astra"
+                                   options={["Astra", "Astra V2", "Astra V3"]} />
+                    <DropdownField label="Picture Processing" value="Nova"
+                                   options={["Nova", "Luna", "Sol"]} />
+                    <DropdownField label="Formula Processing" value="Nova"
+                                   options={["Nova", "Luna", "Sol"]} />
                   </Section>
                 </>
               )}
