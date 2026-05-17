@@ -280,9 +280,9 @@ export default function PlaygroundPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { src: "/assets/parse-icon.svg",   w: 43, h: 52, title: "Parse Documents",  desc: "Parse any PDF or scan into structured Markdown & JSON with layout preserved." },
-                  { src: "/assets/extract-icon.svg", w: 52, h: 52, title: "Extract Data",      desc: "Extract fields, tables, or entities with confidence scores. Includes citation extraction." },
-                  { src: "/assets/split-icon.svg",   w: 40, h: 52, title: "Split Documents",   desc: "Split multi-document PDFs into clean individual files using layout signals." },
+                  { src: "/assets/parse-icon.svg",   w: 78, h: 65, title: "Parse Documents",  desc: "Parse any PDF or scan into structured Markdown & JSON with layout preserved." },
+                  { src: "/assets/extract-icon.svg", w: 78, h: 65, title: "Extract Data",      desc: "Extract fields, tables, or entities with confidence scores. Includes citation extraction." },
+                  { src: "/assets/split-icon.svg",   w: 78, h: 65, title: "Split Documents",   desc: "Split multi-document PDFs into clean individual files using layout signals." },
                 ].map(({ src, w, h, title, desc }) => (
                   <div key={title} className="flex flex-col gap-4 p-4 border bg-white"
                        style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
