@@ -7,6 +7,7 @@ import {
   MoveLeft, ChevronRight, ChevronUp, ChevronDown, Bell, Play, Upload, Plus,
   Settings, SearchCheck, Settings2, SlidersVertical,
   Image as ImageIcon, Type, TableProperties, BookOpenText, Ellipsis, Info, Cpu,
+  Share, Download,
 } from "lucide-react";
 
 const STROKE = 2;
@@ -232,7 +233,24 @@ function Section({
 }
 
 /* ─── Upload (empty) panel ──────────────────────────────────────── */
-function UploadPanel() {
+function UploadPanel({ hasFile, onUpload }: { hasFile: boolean; onUpload: () => void }) {
+  if (hasFile) {
+    return (
+      <div className="flex-1 flex items-stretch p-4 bg-[#f5f5f5] min-h-0">
+        <div className="flex-1 flex items-center justify-center bg-white border" style={{ borderColor: "#e5e5e5" }}>
+          <div className="flex flex-col items-center gap-3 p-8 text-center">
+            <div className="w-10 h-10 bg-[#fdf2f8] flex items-center justify-center">
+              <Upload size={20} strokeWidth={STROKE} className="text-[#F861A8]" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-[16px] font-medium text-[#0a0a0a]">Morgan-stanley-research.pdf</p>
+              <p className="text-[14px] text-[#737373]">Ready to split. Press Run Splitting to continue.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex-1 flex items-stretch p-4 bg-[#f5f5f5] min-h-0">
       <div className="flex-1 flex items-center justify-center border border-dashed bg-white"
@@ -251,7 +269,8 @@ function UploadPanel() {
             </div>
           </div>
           <div className="flex flex-col gap-4 items-center w-full">
-            <button className="flex items-center justify-center gap-2 h-9 px-4 bg-[#171717] text-[#fafafa] text-[14px] font-medium w-full hover:bg-[#333] transition-colors">
+            <button onClick={onUpload}
+                    className="flex items-center justify-center gap-2 h-9 px-4 bg-[#171717] text-[#fafafa] text-[14px] font-medium w-full hover:bg-[#333] transition-colors">
               <Plus size={16} strokeWidth={STROKE} />
               Upload a file
             </button>
@@ -276,9 +295,16 @@ function UploadPanel() {
 }
 
 /* ─── Config sidebar (Configuration tab) ────────────────────────── */
-function ConfigSidebar() {
+function ConfigSidebar({ hasFile }: { hasFile: boolean }) {
   const [outerTab, setOuterTab] = useState<"configuration" | "result">("configuration");
   const [innerTab, setInnerTab] = useState<"basic" | "advanced">("basic");
+  const [hasRun, setHasRun] = useState(false);
+
+  function handleRun() {
+    if (!hasFile) return;
+    setHasRun(true);
+    setOuterTab("result");
+  }
 
   return (
     <div className="flex flex-col flex-1 min-w-0 bg-white min-h-0">
@@ -306,7 +332,14 @@ function ConfigSidebar() {
             Result
           </button>
         </div>
-        <button className="flex items-center justify-center gap-2 p-1.5 bg-[#F861A8] text-[#fafafa] text-[14px] font-medium hover:opacity-90 transition-opacity">
+        <button onClick={handleRun}
+                disabled={!hasFile}
+                title={!hasFile ? "Upload a file first" : undefined}
+                className="flex items-center justify-center gap-2 p-1.5 bg-[#F861A8] text-[#fafafa] text-[14px] font-medium transition-opacity"
+                style={{
+                  opacity: hasFile ? 1 : 0.5,
+                  cursor: hasFile ? "pointer" : "not-allowed",
+                }}>
           <Play size={16} strokeWidth={STROKE} />
           Run Splitting
         </button>
@@ -425,6 +458,8 @@ function ConfigSidebar() {
             </button>
           </div>
         </div>
+      ) : hasRun ? (
+        <SplitterResult />
       ) : (
         <div className="flex-1 flex items-center justify-center text-[14px] text-[#737373]">
           Upload a file and run splitting to see the result.
@@ -434,8 +469,76 @@ function ConfigSidebar() {
   );
 }
 
+/* ─── Splitter result view ─────────────────────────────────────── */
+const SEGMENTS = [
+  { title: "Q3 Performance Overview", pages: 3, confidence: 0.95, previews: [0, 1, 2] },
+  { title: "Market Outlook & Risks",  pages: 3, confidence: 0.92, previews: [3, 4, 5] },
+];
+
+function SplitterResult() {
+  return (
+    <div className="flex-1 min-h-0 overflow-auto">
+      <div className="flex flex-col gap-6 py-0">
+        {/* Header bar */}
+        <div className="flex items-start justify-center gap-3 px-4 py-2 border-b" style={{ borderColor: "#e5e5e5" }}>
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <p className="text-[16px] font-medium text-[#0a0a0a] leading-6">Splitter Result</p>
+            <p className="text-[14px] text-[#737373] leading-5">2 segments across 24 pages</p>
+          </div>
+          <button className="flex items-center justify-center gap-2 p-2 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors"
+                  style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+            <Share size={16} strokeWidth={STROKE} />
+            Share
+          </button>
+          <button className="flex items-center justify-center gap-2 p-2 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors"
+                  style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+            <Download size={16} strokeWidth={STROKE} />
+            Download all
+          </button>
+        </div>
+
+        {/* Segments */}
+        <div className="flex flex-col gap-6 px-4 pb-6">
+          {SEGMENTS.map(({ title, pages, confidence, previews }) => (
+            <div key={title} className="flex flex-col gap-4 border pt-4 px-4 pb-0" style={{ borderColor: "#e4e4e7" }}>
+              {/* Title row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-[14px] font-medium text-[#0a0a0a] leading-5">{title}</span>
+                  <span className="text-[14px] text-[#737373] leading-5">・</span>
+                  <span className="text-[14px] font-medium text-[#737373] leading-5">{pages} pages</span>
+                  <span className="text-[14px] text-[#737373] leading-5">・</span>
+                  <span className="inline-flex items-center px-2 py-1 bg-[#dcfce7] text-[#15803d] text-[12px] font-medium leading-none">
+                    Confidence score: {confidence.toFixed(2)}
+                  </span>
+                </div>
+                <button className="flex items-center justify-center p-2 hover:bg-neutral-100 transition-colors text-[#0a0a0a]">
+                  <Download size={16} strokeWidth={STROKE} />
+                </button>
+              </div>
+              {/* Page thumbnails */}
+              <div className="flex items-center justify-center gap-4">
+                {previews.map(idx => (
+                  <div key={idx} className="flex-1 min-w-0 h-[138px] border pt-3 px-3"
+                       style={{ background: "#e5e5e5", borderColor: "#e5e5e5" }}>
+                    <div className="bg-white h-[125px] w-full overflow-hidden flex items-start justify-center">
+                      <img src={`/assets/previews/preview-${idx}.png`} alt={`page ${idx + 1}`}
+                           className="w-full h-auto" style={{ display: "block" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Page ──────────────────────────────────────────────────────── */
 export default function SplitPage() {
+  const [hasFile, setHasFile] = useState(false);
   return (
     <div className="flex flex-col h-full w-full bg-[#fafafa]">
       <TopBar />
@@ -443,10 +546,10 @@ export default function SplitPage() {
         <div className="flex items-stretch h-full bg-white border" style={{ borderColor: "#e4e4e7" }}>
           {/* Left: upload */}
           <div className="flex flex-col flex-1 min-w-0 border-r overflow-hidden" style={{ borderColor: "#e5e5e5" }}>
-            <UploadPanel />
+            <UploadPanel hasFile={hasFile} onUpload={() => setHasFile(true)} />
           </div>
           {/* Right: config sidebar */}
-          <ConfigSidebar />
+          <ConfigSidebar hasFile={hasFile} />
         </div>
       </div>
     </div>
