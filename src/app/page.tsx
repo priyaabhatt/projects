@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   PanelLeftClose, PanelLeftOpen, Info, LockOpen, Bell, Terminal, X,
   ChevronRight, ArrowRight, Home, Activity, Settings, GitPullRequest,
-  Lock, Briefcase, FileBox, Navigation, Gamepad2,
+  Lock, Briefcase, FileBox, Navigation, Gamepad2, Wand2, Scissors,
 } from "lucide-react";
 
 /* ─── Lucide icons — every glyph at strokeWidth 1.5 ────────────────── */
@@ -153,6 +153,36 @@ export default function PlaygroundPage() {
                   <Gamepad2 size={16} strokeWidth={STROKE} style={{ flexShrink: 0 }} />
                   Playground
                 </button>
+                {/* Extract – locked */}
+                <div className="relative group">
+                  <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <Wand2 size={16} strokeWidth={STROKE} />
+                    </span>
+                    <span className="flex-1 text-[#0a0a0a]">Extract</span>
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <Lock size={16} strokeWidth={STROKE} />
+                    </span>
+                  </button>
+                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
+                    Sign up to extract data from your docs
+                  </span>
+                </div>
+                {/* Split – locked */}
+                <div className="relative group">
+                  <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <Scissors size={16} strokeWidth={STROKE} />
+                    </span>
+                    <span className="flex-1 text-[#0a0a0a]">Split</span>
+                    <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      <Lock size={16} strokeWidth={STROKE} />
+                    </span>
+                  </button>
+                  <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2 py-1.5 bg-[#171717] text-[#fafafa] text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity leading-4">
+                    Sign up to split multi-document PDFs
+                  </span>
+                </div>
                 {/* Workflows – locked */}
                 <div className="relative group">
                   <button className="flex items-center gap-2 h-8 px-2 w-full text-left opacity-50 text-[14px] hover:bg-neutral-100 transition-colors">
@@ -191,14 +221,14 @@ export default function PlaygroundPage() {
                      style={{ borderColor: "#e4e4e7", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)" }}>
                   <div className="px-3 pt-3 pb-3 space-y-2">
                     <div className="flex items-start gap-2">
-                      <span className="text-[#18181b] mt-px shrink-0"><IcLockOpen /></span>
+                      <span className="text-[#F861A8] mt-px shrink-0"><IcLockOpen /></span>
                       <p className="text-[12px] font-medium text-[#18181b] leading-4">Try it on your own docs</p>
                     </div>
                     <p className="text-[12px] text-[#737373] leading-4">
                       Upload any PDF and see real output in under 30 seconds.
                     </p>
                     <div className="flex gap-2">
-                      <button className="flex-1 py-1.5 text-[14px] font-medium text-white bg-[#171717] hover:bg-[#333] transition-colors">
+                      <button className="flex-1 py-1.5 text-[14px] font-medium text-white bg-[#F861A8] hover:bg-[#f04d9c] transition-colors">
                         Sign up
                       </button>
                       <button className="flex-1 py-1.5 text-[14px] font-medium text-[#0a0a0a] border border-[#e5e5e5] bg-white hover:bg-neutral-50 transition-colors">
