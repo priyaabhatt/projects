@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --color-pink-400: #F861A8;
+  --color-primary: #F861A8;
+}
+
 :root {
   --sidebar-bg: #fafafa;
   --sidebar-border: #e4e4e7;
@@ -7,6 +12,7 @@
   --muted-fg: #737373;
   --foreground: #0a0a0a;
   --accent-fg: #171717;
+  --primary: #F861A8;
 }
 
 * { box-sizing: border-box; }

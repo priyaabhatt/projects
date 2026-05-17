@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   PanelLeftClose, PanelLeftOpen, Info, LockOpen, Bell, Terminal, X,
@@ -52,6 +51,21 @@ const templates = [
   { category: "Medical",    type: "Extract" as DocType, title: "2023 Product Rollout Plan" },
   { category: "Legal",      type: "Parse"   as DocType, title: "2023 Product Rollout Plan" },
 ];
+
+/* ─── Document preview — real PDF page 1 thumbnails (freetestdata.com) */
+function MockDocPreview({ variant }: { variant: number }) {
+  const i = variant % 6;
+  return (
+    <img
+      src={`/assets/previews/preview-${i}.png`}
+      alt="Document preview"
+      width={1600}
+      height={2070}
+      className="w-full h-auto"
+      style={{ display: "block" }}
+    />
+  );
+}
 
 /* ─── Main Page ──────────────────────────────────────────────────── */
 export default function PlaygroundPage() {
@@ -108,7 +122,7 @@ export default function PlaygroundPage() {
 
             <div className="flex flex-col gap-1 flex-1">
               <TooltipIcon label="Home">
-                <button className="flex items-center justify-center w-8 h-8 bg-blue-100">
+                <button className="flex items-center justify-center w-8 h-8 bg-pink-100 text-pink-400">
                   <Home size={16} strokeWidth={STROKE} />
                 </button>
               </TooltipIcon>
@@ -135,7 +149,7 @@ export default function PlaygroundPage() {
                  style={{ width: 256, background: "#fafafa" }}>
               <div className="flex flex-col gap-0.5 px-2">
                 {/* Playground – active */}
-                <button className="flex items-center gap-2 h-8 px-2 w-full text-left bg-blue-100 text-blue-600 text-[14px] font-medium">
+                <button className="flex items-center gap-2 h-8 px-2 w-full text-left bg-pink-100 text-pink-400 text-[14px] font-medium">
                   <Gamepad2 size={16} strokeWidth={STROKE} style={{ flexShrink: 0 }} />
                   Playground
                 </button>
@@ -321,14 +335,7 @@ export default function PlaygroundPage() {
                     <div className="flex-1 min-h-0 border overflow-hidden flex items-start justify-center pt-6 px-6"
                          style={{ background: "#f5f5f5", borderColor: "#e5e5e5" }}>
                       <div className="w-full bg-white overflow-hidden">
-                        <Image
-                          src="/assets/doc-preview.png"
-                          alt="Document preview"
-                          width={322}
-                          height={255}
-                          className="w-full h-auto"
-                          style={{ display: "block" }}
-                        />
+                        <MockDocPreview variant={i} />
                       </div>
                     </div>
                     {/* Card footer */}
@@ -342,7 +349,7 @@ export default function PlaygroundPage() {
                         </div>
                         <p className="text-[14px] font-medium text-neutral-800 whitespace-nowrap">{title}</p>
                       </div>
-                      <Link href="/run" className="flex items-center gap-1.5 px-3 py-1.5 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
+                      <Link href={type === "Split" ? "/run/split" : "/run"} className="flex items-center gap-1.5 px-3 py-1.5 border bg-white text-[14px] font-medium text-[#0a0a0a] hover:bg-neutral-50 transition-colors shrink-0"
                               style={{ borderColor: "#e5e5e5", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
                         Try
                         <IcChevronR />

@@ -70,12 +70,12 @@ function CircularProgress({ percent }: { percent: number }) {
     <div className="relative flex items-center justify-center" style={{ width: 56, height: 56 }}>
       <svg width="56" height="56" viewBox="0 0 56 56" style={{ position: "absolute", inset: 0 }}>
         <circle cx="28" cy="28" r={r} stroke="#e5e5e5" strokeWidth="4" fill="none"/>
-        <circle cx="28" cy="28" r={r} stroke="#2563eb" strokeWidth="4" fill="none"
+        <circle cx="28" cy="28" r={r} stroke="#F861A8" strokeWidth="4" fill="none"
           strokeLinecap="round"
           strokeDasharray={`${len} ${circ}`}
           transform="rotate(-90 28 28)"
         />
-        <circle cx={dotX} cy={dotY} r="2.5" fill="#2563eb"/>
+        <circle cx={dotX} cy={dotY} r="2.5" fill="#F861A8"/>
       </svg>
       <span className="text-[12px] font-medium text-[#171717] z-10 leading-none">{Math.floor(percent)}%</span>
     </div>
@@ -263,8 +263,8 @@ const JSON_LINES: string[] = [
   `}`,
 ];
 
-const MD_COLORS   = { h1: "#dc2626", h2: "#ea580c", h3: "#f97316", h4: "#ca8a04", bold: "#2563eb", bullet: "#16a34a", rule: "#e5e5e5", text: "#171717" };
-const JSON_COLORS = { brace: "#0284c7", key: "#dc2626", string: "#2563eb", number: "#9333ea", text: "#171717" };
+const MD_COLORS   = { h1: "#dc2626", h2: "#ea580c", h3: "#f97316", h4: "#ca8a04", bold: "#F861A8", bullet: "#16a34a", rule: "#e5e5e5", text: "#171717" };
+const JSON_COLORS = { brace: "#F861A8", key: "#dc2626", string: "#F861A8", number: "#9333ea", text: "#171717" };
 const MONO_STACK  = '"Geist Mono", ui-monospace, "SF Mono", Menlo, monospace';
 
 function renderMarkdownLine(line: string): ReactNode {
@@ -375,8 +375,8 @@ function DrylabBlock({
   onRef: (el: HTMLDivElement | null) => void;
 }) {
   const baseStyle: CSSProperties = {
-    border: isActive ? "1px solid #2563eb" : "1px solid transparent",
-    background: isActive ? "#eff6ff" : "transparent",
+    border: isActive ? "1px solid #F861A8" : "1px solid transparent",
+    background: isActive ? "#fdf2f8" : "transparent",
     transition: "background 0.2s ease, border-color 0.2s ease",
     padding: "8px 10px",
     margin: "0 -10px 6px",
@@ -404,7 +404,7 @@ function DrylabBlock({
       return (
         <div ref={onRef} style={{
           ...baseStyle,
-          background: isActive ? "#eff6ff" : "#f5f5f5",
+          background: isActive ? "#fdf2f8" : "#f5f5f5",
           padding: "16px 20px",
           margin: "10px 0",
           textAlign: "center",
@@ -420,10 +420,10 @@ function DrylabBlock({
           ...baseStyle,
           padding: "12px 12px",
           margin: "16px 0",
-          borderTop: isActive ? "1px solid #2563eb" : "2px solid #ccc",
-          borderBottom: isActive ? "1px solid #2563eb" : "2px solid #ccc",
-          borderLeft: isActive ? "1px solid #2563eb" : "1px solid transparent",
-          borderRight: isActive ? "1px solid #2563eb" : "1px solid transparent",
+          borderTop: isActive ? "1px solid #F861A8" : "2px solid #ccc",
+          borderBottom: isActive ? "1px solid #F861A8" : "2px solid #ccc",
+          borderLeft: isActive ? "1px solid #F861A8" : "1px solid transparent",
+          borderRight: isActive ? "1px solid #F861A8" : "1px solid transparent",
         }}>
           <p style={{ fontFamily: "Georgia, serif", fontSize: "9pt", lineHeight: 1.6, color: "#666", textAlign: "justify", margin: 0 }}>
             {block.content}
@@ -840,7 +840,7 @@ export default function RunPage() {
                       inputMode="numeric"
                       value={pageInputValue}
                       onChange={e => setPageInputValue(e.target.value.replace(/[^0-9]/g, ""))}
-                      onFocus={e => { e.currentTarget.select(); e.currentTarget.style.borderColor = "#2563eb"; }}
+                      onFocus={e => { e.currentTarget.select(); e.currentTarget.style.borderColor = "#F861A8"; }}
                       onBlur={e => { e.currentTarget.style.borderColor = "#e5e5e5"; commitPageInput(); }}
                       onKeyDown={e => {
                         if (e.key === "Enter")  { commitPageInput(); (e.currentTarget as HTMLInputElement).blur(); }
@@ -1036,10 +1036,10 @@ export default function RunPage() {
                     disabled={!canRun || runState === "loading"}
                     className="flex items-center gap-1.5 px-2 py-1.5 text-[12px] font-medium transition-all"
                     style={canRun && runState !== "loading" ? {
-                      background: "#2563eb", color: "white", border: "1px solid #2563eb", cursor: "pointer",
+                      background: "#F861A8", color: "white", border: "1px solid #F861A8", cursor: "pointer",
                     } : {
-                      background: "#2563eb", color: "white",
-                      border: "1px solid #2563eb", opacity: 0.5, cursor: "not-allowed",
+                      background: "#F861A8", color: "white",
+                      border: "1px solid #F861A8", opacity: 0.5, cursor: "not-allowed",
                     }}>
                     <Ic.Play /> Run Parse
                   </button>
@@ -1429,8 +1429,8 @@ export default function RunPage() {
                         onClick: citationsOn ? () => setActiveSection(a => a === id ? null : id) : undefined,
                         style: {
                           cursor: citationsOn ? "pointer" : "default",
-                          border: isActive ? "1px solid #2563eb" : "1px solid transparent",
-                          background: isActive ? "#eff6ff" : "transparent",
+                          border: isActive ? "1px solid #F861A8" : "1px solid transparent",
+                          background: isActive ? "#fdf2f8" : "transparent",
                           transition: "background 0.18s ease, border-color 0.18s ease",
                         } as CSSProperties,
                       };
